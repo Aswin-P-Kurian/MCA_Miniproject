@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pre-Disaster Aid Prioritizer — Premium Area Input</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Google fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent-1: #0ea5a3; /* teal */
+      --accent-2: #2563eb; /* blue */
+      --glass-bg: rgba(255,255,255,0.85);
+      --card-radius: 12px;
+    }
+    body{
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#f4f7fb 0%, #eef4fb 50%, #f9fbff 100%);
+      color:#0f1724;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .hero {
+      background: linear-gradient(90deg, rgba(37,99,235,0.95), rgba(14,165,163,0.95));
+      color:white;
+      padding:18px 22px;
+      border-radius:14px;
+      box-shadow: 0 10px 30px rgba(16,24,40,0.12);
+    }
+    .hero h1{ font-weight:700; margin:0; font-size:1.2rem; letter-spacing:0.2px }
+    .hero p{ margin:0.2rem 0 0; opacity:0.95; font-size:.9rem }
+    .card-elev {
+      border-radius: var(--card-radius);
+      background: var(--glass-bg);
+      box-shadow: 0 8px 24px rgba(16,24,40,0.06);
+      border: none;
+    }
+    .small-muted { color:#6b7280; font-size:.86rem; }
+    .badge-priority-high { background: linear-gradient(90deg,#ff6b6b,#ff3b3b); color:#fff; border-radius:8px; padding:.35rem .5rem; font-size:.82rem; }
+    .badge-priority-med  { background: linear-gradient(90deg,#ffc857,#ffb703); color:#0f1724; border-radius:8px; padding:.35rem .5rem; font-size:.82rem; }
+    .badge-priority-low  { background: linear-gradient(90deg,#7bd389,#2ebf6b); color:#fff; border-radius:8px; padding:.35rem .5rem; font-size:.82rem; }
+
+    /* table compact & nice */
+    table thead th { vertical-align: middle; background:transparent; border-bottom: none; color:#0f1724; font-weight:600; }
+    .table-row { transition: transform .12s ease, box-shadow .12s ease; border-radius:10px; background:white; margin-bottom:10px; }
+    .table-row:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(16,24,40,0.06); }
+
+    /* collapse advanced panel */
+    .advanced {
+      background: #fbfdff;
+      border-left: 3px solid rgba(37,99,235,0.08);
+      padding:12px;
+      border-radius:8px;
+    }
+
+    .controls { gap:8px; display:flex; align-items:center; flex-wrap:wrap; }
+    .floating-actions { position:sticky; bottom:18px; z-index:99; }
+
+    /* small responsive tweaks */
+    @media (max-width: 980px) {
+      .hero { text-align:center; }
+      .right-panel { margin-top:12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-4">
+
+  <!-- HERO / HEADER -->
+  <div class="d-flex gap-3 align-items-center hero mb-4">
+    <div>
+      <h1 class="mb-0">Pre-Disaster Aid Prioritizer</h1>
+      <p class="mb-0">Premium Area Input — smart compact data-entry to feed your ML model (Priority / Needs / Action)</p>
+    </div>
+    <div class="ms-auto d-flex gap-2 align-items-center">
+      <button id="importBtn" class="btn btn-outline-light btn-sm"><i class="bi bi-upload"></i> Import CSV</button>
+      <button id="templateBtn" class="btn btn-light btn-sm text-primary"><i class="bi bi-file-earmark-text"></i> Download Template</button>
+    </div>
+  </div>
+
+  <div class="row gx-4">
+
+    <!-- LEFT: Table area -->
+    <div class="col-xl-8 col-lg-7">
+
+      <div class="card card-elev p-3 mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div>
+            <h5 class="mb-0">Area Entries</h5>
+            <div class="small-muted">Add rows for each affected area. Use the advanced toggle for extra fields.</div>
+          </div>
+          <div class="controls">
+            <button id="addRow" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Row</button>
+            <button id="computeAll" class="btn btn-outline-info btn-sm"><i class="bi bi-calculator"></i> Compute All</button>
+            <button id="preview" class="btn btn-success btn-sm"><i class="bi bi-send-check"></i> Submit for Prediction</button>
+            <button id="exportBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-download"></i> Export CSV</button>
+          </div>
+        </div>
+
+        <!-- compact cards summary -->
+        <div class="d-flex gap-2 flex-wrap mb-2">
+          <div class="p-2 bg-white rounded-3 small-muted" style="min-width:120px;">
+            Rows: <strong id="rowCount">1</strong><br><span class="small-muted">Ready: <strong id="readyCount">0</strong></span>
+          </div>
+          <div class="p-2 bg-white rounded-3 small-muted" style="min-width:150px;">
+            Avg Vulnerability: <strong id="avgVuln">—</strong>
+          </div>
+          <div class="p-2 bg-white rounded-3 small-muted" style="min-width:170px;">
+            Priority split: <span id="splitBadge"></span>
+          </div>
+        </div>
+
+        <!-- TABLE (each row is a card for a modern look) -->
+        <div id="listArea" class="mt-2">
+          <!-- template card row (cloned) -->
+          <div class="table-row p-2 mb-3" data-row-index="0">
+            <div class="d-flex align-items-start gap-2">
+              <div style="width:88px">
+                <input class="form-control form-control-sm area-name" placeholder="Area name*" required>
+              </div>
+
+              <div class="d-flex gap-2 flex-wrap" style="flex:1">
+                <div style="min-width:90px">
+                  <label class="form-label small-muted mb-1">Pop Density*</label>
+                  <input type="number" class="form-control form-control-sm pop-density" placeholder="e.g. 1030" required>
+                </div>
+
+                <div style="min-width:120px">
+                  <label class="form-label small-muted mb-1">Total Pop*</label>
+                  <input type="number" class="form-control form-control-sm total-pop" placeholder="e.g. 52000" required>
+                </div>
+
+                <div style="min-width:110px">
+                  <label class="form-label small-muted mb-1">Elderly %*</label>
+                  <input type="number" step="0.01" class="form-control form-control-sm pct-elderly" placeholder="13.3" required>
+                </div>
+
+                <div style="min-width:110px">
+                  <label class="form-label small-muted mb-1">Children %*</label>
+                  <input type="number" step="0.01" class="form-control form-control-sm pct-children" placeholder="19.7" required>
+                </div>
+
+                <div style="min-width:120px">
+                  <label class="form-label small-muted mb-1">Disaster*</label>
+                  <select class="form-select form-select-sm disaster-type">
+                    <option>Flood</option><option>Earthquake</option><option>Fire</option><option>Landslide</option><option>Cyclone</option>
+                  </select>
+                </div>
+
+                <div style="min-width:95px">
+                  <label class="form-label small-muted mb-1">Severity*</label>
+                  <select class="form-select form-select-sm severity">
+                    <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                  </select>
+                </div>
+
+                <div style="min-width:110px">
+                  <label class="form-label small-muted mb-1">Road Access</label>
+                  <select class="form-select form-select-sm road-access">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                  </select>
+                </div>
+
+                <div class="ms-auto text-end" style="min-width:150px">
+                  <div class="small-muted mb-1">Vulnerability</div>
+                  <div class="vuln-display" style="font-weight:600">—</div>
+                  <div class="small text-muted">score</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- advanced (collapsible) -->
+            <div class="mt-2 advanced collapse">
+              <div class="row gx-2 gy-2">
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Dist to Hosp (km)</label>
+                  <input type="number" step="0.1" class="form-control form-control-sm dist-hospital">
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Dist to City (km)</label>
+                  <input type="number" step="0.1" class="form-control form-control-sm dist-city">
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Injuries</label>
+                  <input type="number" class="form-control form-control-sm injuries">
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Homeless/Displaced</label>
+                  <input type="number" class="form-control form-control-sm homeless">
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Med Stock</label>
+                  <input type="number" class="form-control form-control-sm med-stock">
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Food Stock</label>
+                  <input type="number" class="form-control form-control-sm food-stock">
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">% Infra Damaged</label>
+                  <input type="number" step="0.1" class="form-control form-control-sm infra-dmg">
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Clean Water</label>
+                  <select class="form-select form-select-sm clean-water"><option>Yes</option><option>No</option></select>
+                </div>
+                <div class="col-sm-3 col-md-2">
+                  <label class="form-label small-muted mb-1">Local Admin</label>
+                  <select class="form-select form-select-sm local-admin"><option>Strong</option><option>Moderate</option><option>Weak</option></select>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mt-2">
+                <button class="btn btn-outline-danger btn-sm remove-row me-2"><i class="bi bi-trash"></i> Remove</button>
+                <button class="btn btn-outline-secondary btn-sm compute-row"><i class="bi bi-lightning-fill"></i> Compute</button>
+                <button class="btn btn-outline-primary btn-sm me-1 toggle-advanced" data-bs-toggle="collapse"><i class="bi bi-chevron-up"></i> Hide</button>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-sm btn-link toggle-advanced" data-bs-toggle="collapse">Advanced ▾</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: Summary & quick controls -->
+    <div class="col-xl-4 col-lg-5 right-panel">
+      <div class="card card-elev p-3 mb-3">
+        <h6 class="mb-2">Batch Summary</h6>
+        <div id="summaryCards" class="d-grid gap-2">
+          <div class="d-flex align-items-center justify-content-between">
+            <small class="small-muted">Rows</small>
+            <h5 id="sumRows">1</h5>
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <small class="small-muted">Ready</small>
+            <h5 id="sumReady">0</h5>
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <small class="small-muted">Avg Vulnerability</small>
+            <h5 id="sumAvgVuln">—</h5>
+          </div>
+          <div>
+            <small class="small-muted">Priority distribution</small>
+            <div class="mt-2" id="priorityPills"></div>
+          </div>
+        </div>
+
+        <hr>
+
+        <h6 class="mb-2">Quick Actions</h6>
+        <div class="d-grid gap-2">
+          <button id="computeBatch" class="btn btn-outline-primary btn-sm">Compute Vulnerability for Visible Rows</button>
+          <button id="clearAll" class="btn btn-outline-danger btn-sm">Clear All Rows</button>
+        </div>
+      </div>
+
+      <div class="card card-elev p-3">
+        <h6>Notes</h6>
+        <p class="small-muted mb-0">Use the compact mode for speed. Open advanced to tweak the less common features. Export CSV to save your batch before submission.</p>
+      </div>
+    </div>
+
+  </div> <!-- row -->
+
+</div> <!-- container -->
+
+<!-- Preview modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Preview Payload (JSON)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="previewInfo" class="small-muted mb-2"></div>
+        <pre id="previewJson" style="background:#f8fafc;padding:12px;border-radius:8px;max-height:55vh;overflow:auto;"></pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button id="confirmSend" class="btn btn-primary btn-sm">Confirm & Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/*
+  Premium Area Input script
+  - Adds/removes rows
+  - Advanced collapse toggles
+  - Compute vulnerability (client-side heuristic)
+  - Import/export CSV (basic)
+  - Preview JSON and placeholder POST
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+  // initial references
+  const listArea = document.getElementById('listArea');
+  const addRowBtn = document.getElementById('addRow');
+  const computeAllBtn = document.getElementById('computeAll');
+  const previewBtn = document.getElementById('preview');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const templateBtn = document.getElementById('templateBtn');
+  const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+  const previewJson = document.getElementById('previewJson');
+  const previewInfo = document.getElementById('previewInfo');
+  const confirmSend = document.getElementById('confirmSend');
+
+  // helper to query row fields
+  function firstRow() { return listArea.querySelector('.table-row'); }
+
+  // attach events to row controls
+  function attachRowEvents(row) {
+    // toggle advanced buttons (they already have bootstrap collapse handled)
+    const toggleBtns = row.querySelectorAll('.toggle-advanced');
+    toggleBtns.forEach(btn => btn.addEventListener('click', () => {
+      const adv = row.querySelector('.advanced');
+      const shown = adv.classList.toggle('show');
+      // update text/icon if desired
+    }));
+
+    // compute per-row
+    const computeBtn = row.querySelector('.compute-row');
+    if (computeBtn) computeBtn.addEventListener('click', () => { computeVulnerability(row); updateSummary(); });
+
+    // remove row
+    const rem = row.querySelector('.remove-row');
+    rem.addEventListener('click', () => {
+      const rows = listArea.querySelectorAll('.table-row');
+      if (rows.length === 1) { // clear
+        row.querySelectorAll('input, select').forEach(el => el.value = '');
+        row.querySelector('.vuln-display').textContent = '—';
+        row.dataset.vuln = '';
+      } else row.remove();
+      updateSummary();
+    });
+
+    // compute on changes for key fields (small throttle)
+    row.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('change', () => { computeVulnerability(row); updateSummary(); });
+    });
+
+    // quick action "Advanced" toggles: show/hide advanced
+    const advToggle = row.querySelector('.toggle-advanced');
+    if (advToggle) advToggle.addEventListener('click', () => {
+      const adv = row.querySelector('.advanced');
+      if (adv) adv.classList.toggle('show');
+    });
+  }
+
+  // create new row from template
+  function addRow() {
+    const template = firstRow();
+    const clone = template.cloneNode(true);
+    // clear inputs
+    clone.querySelectorAll('input').forEach(i => i.value='');
+    clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    clone.querySelector('.vuln-display').textContent = '—';
+    clone.dataset.vuln = '';
+    listArea.appendChild(clone);
+    attachRowEvents(clone);
+    updateSummary();
+    return clone;
+  }
+
+  // compute vulnerability heuristic for a row
+  function computeVulnerability(row) {
+    const getVal = sel => {
+      const el = row.querySelector(sel);
+      if (!el) return 0;
+      const v = el.value;
+      return v === '' ? 0 : Number(v);
+    };
+
+    const injuries = getVal('.injuries');
+    const homeless = getVal('.homeless');
+    const infra = getVal('.infra-dmg');
+    const elderly = getVal('.pct-elderly');
+    const medStock = getVal('.med-stock');
+    const road = getVal('.road-access') || 3;
+    const cleanWater = (row.querySelector('.clean-water')?.value === 'No') ? 1 : 0;
+    const severity = getVal('.severity') || 3;
+    const popdensity = getVal('.pop-density') || 0;
+
+    // weighted heuristic — tuned for 0-100
+    let score = 0;
+    score += (injuries / 10);
+    score += (homeless / 200);
+    score += (infra / 2);
+    score += elderly * 0.9;
+    score += severity * 3.2;
+    if (medStock < 120) score += 7;
+    if (road <= 2) score += 5.5;
+    score += cleanWater * 7;
+    // population density amplifies vulnerability a bit
+    score += Math.min(popdensity/1000, 15);
+
+    score = Math.round(Math.max(0, Math.min(100, score)));
+
+    // categorize
+    let label = 'Low', badge = 'badge-priority-low';
+    if (score >= 65) { label = 'High'; badge = 'badge-priority-high'; }
+    else if (score >= 35) { label = 'Medium'; badge = 'badge-priority-med'; }
+
+    row.dataset.vuln = score;
+    row.querySelector('.vuln-display').innerHTML = `<span class="${badge}" style="padding:.25rem .45rem">${label}</span> <div style="font-size:.85rem;color:#6b7280;">${score}</div>`;
+    return score;
+  }
+
+  // update summary (row count, ready count, avg vuln)
+  function updateSummary() {
+    const rows = Array.from(listArea.querySelectorAll('.table-row'));
+    document.getElementById('rowCount').innerText = rows.length;
+    document.getElementById('sumRows').innerText = rows.length;
+
+    let ready = 0, sum = 0, countV=0;
+    rows.forEach(r => {
+      // required fields (area name, pop density, total pop, elderly, children)
+      const required = ['.area-name', '.pop-density', '.total-pop', '.pct-elderly', '.pct-children'];
+      const filled = required.every(sel => {
+        const el = r.querySelector(sel);
+        return el && el.value !== '';
+      });
+      if (filled) ready++;
+      const v = Number(r.dataset.vuln || 0);
+      if (!isNaN(v) && v>0) { sum += v; countV++; }
+    });
+
+    const avg = countV? Math.round(sum/countV) : '—';
+    document.getElementById('readyCount').innerText = ready;
+    document.getElementById('sumReady').innerText = ready;
+    document.getElementById('avgVuln').innerText = avg;
+    document.getElementById('sumAvgVuln').innerText = avg;
+
+    // create priority pills quick
+    const high = rows.filter(r => Number(r.dataset.vuln)>=65).length;
+    const med  = rows.filter(r => Number(r.dataset.vuln)>=35 && Number(r.dataset.vuln)<65).length;
+    const low  = rows.filter(r => Number(r.dataset.vuln)<35 && r.dataset.vuln!=='').length;
+    const pill = document.getElementById('priorityPills');
+    pill.innerHTML = `
+      <span class="badge badge-priority-high me-1">${high} High</span>
+      <span class="badge badge-priority-med me-1">${med} Med</span>
+      <span class="badge badge-priority-low">${low} Low</span>
+    `;
+  }
+
+  // export CSV
+  function exportCSV() {
+    const rows = Array.from(listArea.querySelectorAll('.table-row'));
+    const headers = ['Area Name','Population Density','Total Population','Percentage of Elderly People (65+)','Percentage of Children (0–12)','Type of Disaster','Severity','Road Access','Dist to Hosp (km)','Dist to City (km)','Injuries','Homeless','Med Stock','Food Stock','% Infra Damaged','Clean Water','Local Admin','Vulnerability'];
+    const lines = [headers.join(',')];
+    rows.forEach(r => {
+      const vals = [
+        r.querySelector('.area-name').value || '',
+        r.querySelector('.pop-density').value || '',
+        r.querySelector('.total-pop').value || '',
+        r.querySelector('.pct-elderly').value || '',
+        r.querySelector('.pct-children').value || '',
+        r.querySelector('.disaster-type').value || '',
+        r.querySelector('.severity').value || '',
+        r.querySelector('.road-access').value || '',
+        r.querySelector('.dist-hospital')?.value || '',
+        r.querySelector('.dist-city')?.value || '',
+        r.querySelector('.injuries')?.value || '',
+        r.querySelector('.homeless')?.value || '',
+        r.querySelector('.med-stock')?.value || '',
+        r.querySelector('.food-stock')?.value || '',
+        r.querySelector('.infra-dmg')?.value || '',
+        r.querySelector('.clean-water')?.value || '',
+        r.querySelector('.local-admin')?.value || '',
+        r.dataset.vuln || ''
+      ];
+      lines.push(vals.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+    });
+    const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'areas_batch.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // parse CSV (very basic), populate rows
+  function importCSV(fileText) {
+    const lines = fileText.split(/\r?\n/).filter(Boolean);
+    if (lines.length < 2) return alert('CSV has no data rows.');
+    const headers = lines[0].split(',').map(h => h.replace(/(^"|"$)/g,'').trim());
+    // mapping common header names to selectors:
+    const map = {
+      'Area Name':'area-name','Population Density':'pop-density','Total Population':'total-pop',
+      'Percentage of Elderly People (65+)':'pct-elderly','Percentage of Children (0–12)':'pct-children',
+      'Type of Disaster':'disaster-type','Severity':'severity','Road Access':'road-access',
+      'Dist to Hosp (km)':'dist-hospital','Dist to City (km)':'dist-city','Injuries':'injuries',
+      'Homeless':'homeless','Med Stock':'med-stock','Food Stock':'food-stock','% Infra Damaged':'infra-dmg',
+      'Clean Water':'clean-water','Local Admin':'local-admin'
+    };
+
+    // clear existing rows
+    listArea.innerHTML = '';
+    const template = firstRow();
+    lines.slice(1).forEach(line => {
+      const cols = parseCSVLine(line);
+      if (cols.length === 0) return;
+      const clone = template.cloneNode(true);
+      // populate by headers
+      headers.forEach((h, idx) => {
+        const sel = map[h];
+        if (!sel) return;
+        const el = clone.querySelector('.' + sel);
+        if (el) el.value = cols[idx]?.replace(/^"|"$/g,'') || '';
+      });
+      listArea.appendChild(clone);
+      attachRowEvents(clone);
+      computeVulnerability(clone);
+    });
+    updateSummary();
+  }
+
+  function parseCSVLine(line) {
+    // naive: split by comma but handle quoted with regex
+    const re = /("([^"]*(?:""[^"]*)*)"|[^,]+|)/g;
+    const out = [];
+    let m; let idx = 0;
+    while ((m = re.exec(line)) !== null) {
+      if (m[0] === '') break;
+      let v = m[0];
+      if (v[0] === '"') v = v.slice(1, -1).replace(/""/g,'"');
+      out.push(v);
+      if (line[re.lastIndex] === ',') re.lastIndex++;
+      if (re.lastIndex >= line.length) break;
+      idx++;
+    }
+    return out;
+  }
+
+  // preview and send (placeholder)
+  function previewAndSend() {
+    const rows = Array.from(listArea.querySelectorAll('.table-row'));
+    const payload = rows.map(r => ({
+      area_name: r.querySelector('.area-name').value || null,
+      population_density: Number(r.querySelector('.pop-density').value) || null,
+      total_population: Number(r.querySelector('.total-pop').value) || null,
+      pct_elderly: Number(r.querySelector('.pct-elderly').value) || null,
+      pct_children: Number(r.querySelector('.pct-children').value) || null,
+      type_of_disaster: r.querySelector('.disaster-type').value || null,
+      severity: Number(r.querySelector('.severity').value) || null,
+      road_access: Number(r.querySelector('.road-access').value) || null,
+      dist_hospital_km: Number(r.querySelector('.dist-hospital')?.value) || null,
+      dist_city_km: Number(r.querySelector('.dist-city')?.value) || null,
+      injuries_est: Number(r.querySelector('.injuries')?.value) || 0,
+      homeless_est: Number(r.querySelector('.homeless')?.value) || 0,
+      med_stock: Number(r.querySelector('.med-stock')?.value) || 0,
+      food_stock: Number(r.querySelector('.food-stock')?.value) || 0,
+      pct_infra_damaged: Number(r.querySelector('.infra-dmg')?.value) || 0,
+      clean_water: r.querySelector('.clean-water')?.value || 'Yes',
+      local_admin: r.querySelector('.local-admin')?.value || 'Moderate',
+      vulnerability_score: Number(r.dataset.vuln || 0)
+    }));
+    previewJson.textContent = JSON.stringify(payload, null, 2);
+    previewInfo.innerText = `Rows: ${payload.length} • Missing required fields will remain null in payload.`;
+    previewModal.show();
+  }
+
+  // send to server (placeholder)
+  async function sendToServer() {
+    confirmSend.disabled = true;
+    confirmSend.textContent = 'Sending...';
+    try {
+      const payload = JSON.parse(previewJson.textContent);
+      // TODO: replace '/predict' with your actual endpoint
+      const resp = await fetch('/predict', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({rows: payload})
+      });
+      if (!resp.ok) {
+        alert('Server responded with ' + resp.status + ' (this UI uses placeholder endpoint).');
+      } else {
+        alert('Sent successfully (demo). Replace endpoint with your backend to see results.');
+      }
+    } catch (err) {
+      alert('Failed to send: ' + err.message);
+    } finally {
+      confirmSend.disabled = false;
+      confirmSend.textContent = 'Confirm & Send';
+      previewModal.hide();
+    }
+  }
+
+  // initial attach for the first template row
+  attachRowEvents(firstRow());
+  computeVulnerability(firstRow());
+  updateSummary();
+
+  // wired UI events
+  addRowBtn.addEventListener('click', () => { addRow(); });
+  computeAllBtn.addEventListener('click', () => {
+    Array.from(listArea.querySelectorAll('.table-row')).forEach(r => computeVulnerability(r));
+    updateSummary();
+  });
+  document.getElementById('computeBatch').addEventListener('click', () => {
+    Array.from(listArea.querySelectorAll('.table-row')).forEach(r => computeVulnerability(r));
+    updateSummary();
+  });
+  document.getElementById('clearAll').addEventListener('click', () => {
+    // clear rows but keep one
+    listArea.innerHTML = '';
+    const r = addRow();
+    updateSummary();
+  });
+
+  // export
+  exportBtn.addEventListener('click', exportCSV);
+  document.getElementById('exportBtn').addEventListener('click', exportCSV);
+  document.getElementById('templateBtn').addEventListener('click', () => {
+    // download a small template CSV
+    const headers = ['Area Name','Population Density','Total Population','Percentage of Elderly People (65+)','Percentage of Children (0–12)','Type of Disaster','Severity','Road Access'];
+    const csv = headers.join(',') + '\n';
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download='pre_disaster_template.csv'; a.click();
+  });
+
+  // basic import (uses file picker)
+  importBtn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => importCSV(ev.target.result);
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+
+  // preview submit
+  previewBtn.addEventListener('click', previewAndSend);
+  confirmSend.addEventListener('click', sendToServer);
+
+}); // DOMContentLoaded
+</script>
+
+</body>
+</html>

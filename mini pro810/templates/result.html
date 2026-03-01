@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pre-Disaster Aid Classification Dashboard</title>
+
+  <!-- Bootstrap + Icons + Chart.js -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      --success-gradient: linear-gradient(135deg,#11998e 0%,#38ef7d 100%);
+      --warning-gradient: linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
+      --danger-gradient: linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
+      --info-gradient: linear-gradient(135deg,#43e97b 0%,#38f9d7 100%);
+      --bg-primary: #0f1419;
+      --bg-secondary: #1a1f2e;
+      --bg-card: rgba(26,31,46,0.95);
+      --bg-card-hover: rgba(26,31,46,0.98);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --border-color: rgba(100,116,139,0.2);
+      --glass-bg: rgba(15,20,25,0.8);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(135deg,#0f1419 0%,#1a1f2e 25%,#2d3748 50%,#1a202c 75%,#0f1419 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 1rem;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(102,126,234,0.06) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(118,75,162,0.05) 0%, transparent 45%);
+      pointer-events: none; z-index: -1;
+    }
+
+    .dashboard-container { max-width: 1600px; margin: 0 auto; }
+
+    .dashboard-header {
+      text-align:center; margin-bottom: 1.25rem; padding: 1.5rem 1rem;
+      background: var(--glass-bg); border-radius: 16px; border: 1px solid var(--border-color);
+      backdrop-filter: blur(14px);
+    }
+    .dashboard-title {
+      font-size: 2.2rem; font-weight: 800; margin-bottom: .35rem;
+      background: var(--primary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .dashboard-subtitle { color: var(--text-secondary); font-size: 1rem; }
+
+    /* KPI Cards */
+    .kpi-card { background: var(--bg-secondary); border-radius: 12px; padding: 1rem; text-align:center; }
+    .kpi-number { font-size: 1.9rem; font-weight:800; background:var(--primary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .kpi-label { color: var(--text-secondary); font-weight:600; font-size:.85rem; }
+
+    /* Glass card wrapper */
+    .glass-card { background: var(--bg-card); border-radius:12px; padding:1rem; border:1px solid var(--border-color); box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+    .glass-card.sm { padding:.75rem; }
+
+    /* Table — keep original dark bg */
+    .areas-table { background: var(--bg-secondary); border-radius:10px; padding: .65rem; border:1px solid var(--border-color); }
+    table.table-custom { width: 100%; border-collapse: separate; color: var(--text-primary); background: transparent; }
+    table.table-custom thead th {
+      background: var(--primary-gradient); color: white; font-weight:700; font-size:.82rem; padding:.75rem; text-transform:uppercase; border:none;
+    }
+    table.table-custom td {
+      background: transparent; padding:.75rem; border-bottom:1px solid rgba(100,116,139,0.08);
+      font-weight:500; vertical-align: middle;
+    }
+    table.table-custom tbody tr:hover { background: rgba(102,126,234,0.03); transform: none; }
+
+    .priority-badge { padding:.35rem .65rem; border-radius:18px; font-weight:700; font-size:.78rem; color: #fff; display:inline-block; }
+    .priority-high { background: linear-gradient(135deg,#E72A8C 0%,#E72A8C 100%); }
+    .priority-medium { background: linear-gradient(135deg,#4d79ff 0%,RGB(0,255,255) 100%); }
+    .priority-low { background: linear-gradient(135deg,#ffcc66 0%,#ff9900 100%); }
+
+    .urgency-indicator { display:flex; align-items:center; gap:.5rem; }
+    .urgency-dot { width:8px; height:8px; border-radius:50%; box-shadow: 0 0 6px currentColor; display:inline-block; }
+    .urgency-critical { background: #E72A8C; }
+    .urgency-moderate { background: RGB(0,255,255); }
+    .urgency-low { background: #ffcc66; }
+
+    /* Chart container smaller to avoid tall whitespace */
+    .chart-container { height: 260px; display:flex; align-items:center; justify-content:center; }
+
+    /* Resources grid: side-by-side approach */
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      align-items: start;
+    }
+    .resource-item {
+      background: var(--bg-secondary); border-radius:10px; padding: .75rem; border:1px solid var(--border-color);
+    }
+    .resource-header { display:flex; align-items:center; gap:.6rem; margin-bottom:.6rem; }
+    .resource-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; flex-shrink:0; }
+    .resource-icon.rescue { background: var(--danger-gradient); }
+    .resource-icon.food { background: var(--warning-gradient); }
+    .resource-icon.water { background: var(--info-gradient); }
+    .resource-icon.medical { background: var(--success-gradient); }
+
+    .area-allocation { background: rgba(102,126,234,0.04); border-radius:6px; padding:.5rem; border:1px solid rgba(102,126,234,0.05); margin-top:.5rem; }
+    .area-name { font-weight:600; color:var(--text-primary); margin-bottom:.25rem; }
+    .area-resources { display:flex; gap:.6rem; color:var(--text-secondary); font-size:.85rem; flex-wrap:wrap; }
+
+    .progress-custom { height:8px; border-radius:8px; background: rgba(100,116,139,0.12); overflow:hidden; }
+    .progress-bar-custom { height:100%; transition: width .7s cubic-bezier(.4,0,.2,1); border-radius:8px; }
+
+    .action-card { background: linear-gradient(135deg, rgba(102,126,234,0.04), rgba(118,75,162,0.03)); border-radius:10px; padding:.75rem; margin-bottom:.6rem; border:1px solid rgba(102,126,234,0.06); }
+    .action-title { font-weight:700; color:#667eea; margin-bottom:.35rem; }
+
+    .search-input { background: transparent; border: 1px solid rgba(100,116,139,0.12); padding:.45rem .6rem; border-radius:8px; color:var(--text-primary); width:260px; }
+    .search-input:focus { outline: none; box-shadow: 0 0 0 .12rem rgba(102,126,234,0.06); }
+
+    @media (max-width: 992px) {
+      .chart-container { height: 220px; }
+      .resources-grid { grid-template-columns: 1fr 1fr; gap:.6rem; }
+    }
+    @media (max-width: 768px) {
+      .chart-container { height: 190px; }
+      .resources-grid { grid-template-columns: 1fr; } /* stack on small screens */
+      .search-input { width: 160px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header glass-card">
+      <h1 class="dashboard-title">Pre-Disaster Aid Classification</h1>
+      <p class="dashboard-subtitle">AI-Powered Emergency Response Prioritization System</p>
+      <small class="text-muted">Last Updated: <span id="lastUpdated"></span></small>
+      <div class="mt-3">
+        <a href="/" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-arrow-left me-2"></i>Back to Input
+        </a>
+      </div>
+    </div>
+
+    <!-- KPI row -->
+    <div class="row g-3 my-3">
+      <div class="col-lg-3 col-md-6"><div class="kpi-card glass-card"><div class="kpi-number" id="totalAreas">—</div><div class="kpi-label">Total Areas</div></div></div>
+      <div class="col-lg-3 col-md-6"><div class="kpi-card glass-card"><div class="kpi-number" id="highPriority">—</div><div class="kpi-label">High Priority</div></div></div>
+      <div class="col-lg-3 col-md-6"><div class="kpi-card glass-card"><div class="kpi-number" id="mediumPriority">—</div><div class="kpi-label">Medium Priority</div></div></div>
+      <div class="col-lg-3 col-md-6"><div class="kpi-card glass-card"><div class="kpi-number" id="lowPriority">—</div><div class="kpi-label">Low Priority</div></div></div>
+    </div>
+
+    <!-- Top row: Table (left) + Suggested actions (right) -->
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="glass-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Area Classifications</h4>
+            <input id="searchAreas" class="search-input" placeholder="Search areas..." />
+          </div>
+
+          <div class="areas-table">
+            <table class="table-custom" role="table" id="areasTable">
+              <thead>
+                <tr>
+                  <th>Area</th>
+                  <th>Priority</th>
+                  <th>Urgency</th>
+                </tr>
+              </thead>
+              <tbody id="areasTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="glass-card">
+          <h4 class="mb-3">Suggested Actions</h4>
+          <div id="suggestedActions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row: Chart (left) + Resources (right, side-by-side grid) -->
+    <div class="row g-4 mt-2">
+      <div class="col-lg-6">
+        <div class="glass-card">
+          <h4 class="mb-3">Priority Distribution</h4>
+          <div class="chart-container">
+            <canvas id="priorityChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="glass-card">
+          <h4 class="mb-3">Resource Allocation by Area</h4>
+
+          <!-- resources grid (side-by-side) -->
+          <div class="resources-grid">
+            <!-- Rescue -->
+            <div class="resource-item" id="rescueCard">
+              <div class="resource-header">
+                <div class="resource-icon rescue"><i class="bi bi-shield-plus"></i></div>
+                <div style="flex:1">
+                  <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div><strong>Rescue Teams</strong><br/><small class="text-muted">Emergency Response Units</small></div>
+                    <div class="text-end"><div id="rescueHighest" style="font-weight:700">0</div><small class="text-muted">highest allocated</small></div>
+                  </div>
+                </div>
+              </div>
+              <div id="rescueAreas"></div>
+              <div class="mt-2">
+                <div class="d-flex justify-content-between mb-2"><small style="color:#4facfe">To high-priority areas</small><small id="rescueDistribution">0% allocated</small></div>
+                <div class="progress-custom"><div id="rescueProgress" class="progress-bar-custom" style="width:0%; background:var(--danger-gradient)"></div></div>
+              </div>
+            </div>
+
+            <!-- Food -->
+            <div class="resource-item" id="foodCard">
+              <div class="resource-header">
+                <div class="resource-icon food"><i class="bi bi-basket3"></i></div>
+                <div style="flex:1">
+                  <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div><strong>Food Supplies</strong><br/><small class="text-muted">Emergency Rations</small></div>
+                    <div class="text-end"><div id="foodLowest" style="font-weight:700">0%</div><small class="text-muted">lowest</small></div>
+                  </div>
+                </div>
+              </div>
+              <div id="foodAreas"></div>
+              <div class="mt-2">
+                <div class="d-flex justify-content-between mb-2"><small style="color:#f093fb">Critical shortage</small><small id="foodDistribution">0% critical</small></div>
+                <div class="progress-custom"><div id="foodProgress" class="progress-bar-custom" style="width:0%; background:var(--warning-gradient)"></div></div>
+              </div>
+            </div>
+
+            <!-- Water -->
+            <div class="resource-item" id="waterCard">
+              <div class="resource-header">
+                <div class="resource-icon water"><i class="bi bi-droplet"></i></div>
+                <div style="flex:1">
+                  <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div><strong>Water Supply</strong><br/><small class="text-muted">Clean Water</small></div>
+                    <div class="text-end"><div id="waterLowest" style="font-weight:700">0%</div><small class="text-muted">lowest</small></div>
+                  </div>
+                </div>
+              </div>
+              <div id="waterAreas"></div>
+              <div class="mt-2">
+                <div class="d-flex justify-content-between mb-2"><small style="color:#43e97b">Critical shortage</small><small id="waterDistribution">0% critical</small></div>
+                <div class="progress-custom"><div id="waterProgress" class="progress-bar-custom" style="width:0%; background:var(--info-gradient)"></div></div>
+              </div>
+            </div>
+
+            <!-- Medical -->
+            <div class="resource-item" id="medicalCard">
+              <div class="resource-header">
+                <div class="resource-icon medical"><i class="bi bi-plus-circle"></i></div>
+                <div style="flex:1">
+                  <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div><strong>Medical Teams</strong><br/><small class="text-muted">Healthcare Support</small></div>
+                    <div class="text-end"><div id="medicalHighest" style="font-weight:700">0</div><small class="text-muted">highest</small></div>
+                  </div>
+                </div>
+              </div>
+              <div id="medicalAreas"></div>
+              <div class="mt-2">
+                <div class="d-flex justify-content-between mb-2"><small style="color:#11998e">To high-priority areas</small><small id="medicalDistribution">0% allocated</small></div>
+                <div class="progress-custom"><div id="medicalProgress" class="progress-bar-custom" style="width:0%; background:var(--success-gradient)"></div></div>
+              </div>
+            </div>
+
+          </div> <!-- resources-grid -->
+        </div> <!-- glass-card -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get results from Flask template
+    const modelOutput = {{ modelOutput | tojson }};
+    
+    // weights for need calculation
+    const priorityWeight = { High: 3, Medium: 2, Low: 1 };
+    const urgencyWeight = { Critical: 3, Moderate: 2, Low: 1 };
+
+    function initializeDashboard(){
+      updateTimestamp();
+      updateKPIs();
+      populateAreasTable();
+      generateSuggestedActions();
+      createPriorityChart();
+      updateResourceAllocation();
+      setupSearch();
+    }
+
+    function updateTimestamp(){ 
+      document.getElementById('lastUpdated').textContent = modelOutput.timestamp; 
+    }
+
+    function updateKPIs(){
+      document.getElementById('totalAreas').textContent = modelOutput.areas.length;
+      document.getElementById('highPriority').textContent = modelOutput.priorities.High || 0;
+      document.getElementById('mediumPriority').textContent = modelOutput.priorities.Medium || 0;
+      document.getElementById('lowPriority').textContent = modelOutput.priorities.Low || 0;
+    }
+
+    // priority chart
+    function createPriorityChart(){
+      const ctx = document.getElementById('priorityChart').getContext('2d');
+      
+      if (window._priorityChart) window._priorityChart.destroy();
+      window._priorityChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['High Priority','Medium Priority','Low Priority'],
+          datasets: [{
+            data: [
+              modelOutput.priorities.High || 0,
+              modelOutput.priorities.Medium || 0,
+              modelOutput.priorities.Low || 0
+            ],
+            backgroundColor: [
+              '#E72A8C',  // HIGH (Bright Pink/Magenta)
+              'RGB(0,255,255)',  // MEDIUM (Teal/Cyan)
+              '#ffcc66'   // LOW (Coral/Peach)
+            ],
+            borderColor: [
+              '#000000',   // Darker Pink
+              'RGB(0,255,255)',   // Darker Teal
+              '#FFFFFF'    // Darker Coral
+            ],
+            borderWidth: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: 'rgba(226,232,240,0.9)' } }
+          }
+        }
+      });
+    }
+
+    // resource distribution algorithm (need-based)
+    function updateResourceAllocation(){
+      const areas = modelOutput.areas.map(a => ({ ...a }));
+
+      // compute scores
+      areas.forEach(a => {
+        const pW = priorityWeight[a.priority] || 1;
+        const uW = urgencyWeight[a.urgency] || 1;
+        a.needScore = pW * uW * (a.population / 1000);
+        a.foodDeficitScore = Math.max(0, 100 - (a.food_supplies || 0)) * (a.population / 1000);
+        a.waterDeficitScore = Math.max(0, 100 - (a.water_supply || 0)) * (a.population / 1000);
+      });
+
+      // totals and safe-guards
+      const totalRescue = Math.max(1, modelOutput.resources.rescue_total || 0);
+      const totalMedical = Math.max(1, modelOutput.resources.medical_total || 0);
+      const totalFood = Math.max(1, modelOutput.resources.food_total || 0);
+      const totalWater = Math.max(1, modelOutput.resources.water_total || 0);
+
+      const sumNeed = areas.reduce((s,a)=>s+a.needScore,0) || 1;
+      const sumFoodNeed = areas.reduce((s,a)=>s+a.foodDeficitScore,0) || 1;
+      const sumWaterNeed = areas.reduce((s,a)=>s+a.waterDeficitScore,0) || 1;
+
+      // allocate proportionally
+      areas.forEach(a => {
+        a.allocatedRescue = (a.needScore / sumNeed) * totalRescue;
+        a.allocatedMedical = (a.needScore / sumNeed) * totalMedical;
+        a.allocatedFood = (a.foodDeficitScore / sumFoodNeed) * totalFood;
+        a.allocatedWater = (a.waterDeficitScore / sumWaterNeed) * totalWater;
+      });
+
+      // sort for display
+      const rescueSorted = [...areas].sort((x,y)=>y.allocatedRescue - x.allocatedRescue);
+      const medicalSorted = [...areas].sort((x,y)=>y.allocatedMedical - x.allocatedMedical);
+      const foodSorted = [...areas].sort((x,y)=>y.allocatedFood - x.allocatedFood);
+      const waterSorted = [...areas].sort((x,y)=>y.allocatedWater - x.allocatedWater);
+
+      // numeric summary
+      document.getElementById('rescueHighest').textContent = Math.round(rescueSorted[0]?.allocatedRescue || 0);
+      document.getElementById('medicalHighest').textContent = Math.round(medicalSorted[0]?.allocatedMedical || 0);
+      document.getElementById('foodLowest').textContent = Math.min(...areas.map(a=>a.food_supplies)).toString() + '%';
+      document.getElementById('waterLowest').textContent = Math.min(...areas.map(a=>a.water_supply)).toString() + '%';
+
+      // render top 2 for each resource
+      function renderTop(list, containerId, labelFn) {
+        const html = list.slice(0,2).map(a => `
+          <div class="area-allocation">
+            <div class="area-name">${a.area}</div>
+            <div class="area-resources">
+              <div><i class="bi bi-people"></i>&nbsp;${a.population.toLocaleString()} pop</div>
+              <div>${labelFn(a)}</div>
+            </div>
+          </div>
+        `).join('');
+        document.getElementById(containerId).innerHTML = html;
+      }
+
+      renderTop(rescueSorted, 'rescueAreas', a => `<small>${Math.round(a.allocatedRescue)} teams</small>`);
+      renderTop(medicalSorted, 'medicalAreas', a => `<small>${Math.round(a.allocatedMedical)} teams</small>`);
+      renderTop(foodSorted, 'foodAreas', a => `<small>${Math.round(a.allocatedFood)} units • ${a.food_supplies}% avail</small>`);
+      renderTop(waterSorted, 'waterAreas', a => `<small>${Math.round(a.allocatedWater)} units • ${a.water_supply}% avail</small>`);
+
+      // progress metrics
+      const rescueToHigh = areas.filter(a => a.priority === 'High').reduce((s,a)=>s+a.allocatedRescue,0);
+      const rescuePct = Math.round((rescueToHigh / totalRescue) * 100);
+      document.getElementById('rescueDistribution').textContent = `${rescuePct}% to high priority`;
+      document.getElementById('rescueProgress').style.width = `${Math.min(100, Math.max(0, rescuePct))}%`;
+
+      const medicalToHigh = areas.filter(a => a.priority === 'High').reduce((s,a)=>s+a.allocatedMedical,0);
+      const medPct = Math.round((medicalToHigh / totalMedical) * 100);
+      document.getElementById('medicalDistribution').textContent = `${medPct}% to high priority`;
+      document.getElementById('medicalProgress').style.width = `${Math.min(100, Math.max(0, medPct))}%`;
+
+      const foodCriticalAllocated = areas.filter(a => a.food_supplies < 60).reduce((s,a)=>s+a.allocatedFood,0);
+      const foodCritPct = Math.round((foodCriticalAllocated / totalFood) * 100);
+      document.getElementById('foodDistribution').textContent = `${foodCritPct}% to critical areas`;
+      document.getElementById('foodProgress').style.width = `${Math.min(100, Math.max(0, foodCritPct))}%`;
+
+      const waterCriticalAllocated = areas.filter(a => a.water_supply < 60).reduce((s,a)=>s+a.allocatedWater,0);
+      const waterCritPct = Math.round((waterCriticalAllocated / totalWater) * 100);
+      document.getElementById('waterDistribution').textContent = `${waterCritPct}% to critical areas`;
+      document.getElementById('waterProgress').style.width = `${Math.min(100, Math.max(0, waterCritPct))}%`;
+    }
+
+    // populate area table (reduced columns)
+    function populateAreasTable() {
+      const tbody = document.getElementById('areasTableBody');
+      tbody.innerHTML = modelOutput.areas.map(area => {
+        const urgencyClass = area.urgency === 'Critical' ? 'urgency-critical' : (area.urgency === 'Moderate' ? 'urgency-moderate' : 'urgency-low');
+        return `
+          <tr>
+            <td><strong>${area.area}</strong><br/><small class="text-muted">${area.population.toLocaleString()} people</small></td>
+            <td><span class="priority-badge priority-${area.priority.toLowerCase()}">${area.priority}</span></td>
+            <td><div class="urgency-indicator"><span class="urgency-dot ${urgencyClass}"></span><span style="margin-left:6px">${area.urgency}</span></div><small class="text-muted">${area.urgency_hours}h</small></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // suggested actions
+  function generateSuggestedActions() {
+      const container = document.getElementById('suggestedActions');
+      
+      // MODIFIED: Filter removed to show actions for ALL areas
+      container.innerHTML = modelOutput.areas
+        .map(a => `
+          <div class="action-card">
+            <div class="action-title">${a.area} (Priority: ${a.priority})</div>
+            <p class="mb-0">${a.action}</p>
+        </div>
+        `).join('');
+}
+
+    // search filter
+    function setupSearch() {
+      const input = document.getElementById('searchAreas');
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        document.querySelectorAll('#areasTableBody tr').forEach(row => {
+          row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+      });
+    }
+
+    // start
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeDashboard();
+      // keep chart stable on resize
+      window.addEventListener('resize', () => { if (window._priorityChart) window._priorityChart.resize(); });
+    });
+  </script>
+</body>
+</html>

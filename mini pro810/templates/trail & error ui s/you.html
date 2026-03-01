@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Disaster Aid Prioritizer - Enhanced</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-blue: #3B82F6;
+            --light-blue: #60A5FA;
+            --sky-blue: #87CEEB;
+            --ice-blue: #E0F2FE;
+            --white: #FFFFFF;
+            --light-gray: #F8FAFC;
+            --blue-gradient: linear-gradient(135deg, #3B82F6 0%, #60A5FA 50%, #87CEEB 100%);
+            --white-gradient: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 50%, #E0F2FE 100%);
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --shadow-light: 0 8px 32px rgba(59, 130, 246, 0.1);
+            --shadow-medium: 0 12px 40px rgba(59, 130, 246, 0.15);
+            --shadow-heavy: 0 20px 60px rgba(59, 130, 246, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--blue-gradient);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #1e293b;
+        }
+
+        /* Animated Background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), rgba(135, 206, 235, 0.1));
+            animation: float 20s infinite ease-in-out;
+            backdrop-filter: blur(10px);
+        }
+
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            top: -10%;
+            left: -5%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 200px;
+            height: 200px;
+            top: 20%;
+            right: -5%;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 150px;
+            height: 150px;
+            bottom: 10%;
+            left: 10%;
+            animation-delay: -14s;
+        }
+
+        .orb-4 {
+            width: 100px;
+            height: 100px;
+            bottom: -5%;
+            right: 20%;
+            animation-delay: -21s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.7;
+            }
+            33% {
+                transform: translateY(-30px) rotate(120deg);
+                opacity: 0.9;
+            }
+            66% {
+                transform: translateY(20px) rotate(240deg);
+                opacity: 0.8;
+            }
+        }
+
+        /* Navigation */
+        .glass-navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .brand-logo {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--blue-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .logo-pulse {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-blue);
+            border-radius: 12px;
+            animation: pulse 2s infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.1; }
+            100% { transform: scale(1); opacity: 0.3; }
+        }
+
+        .brand-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin: 0;
+        }
+
+        .brand-subtitle {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--glass-border);
+            color: var(--primary-blue);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+            color: var(--primary-blue);
+        }
+
+        .btn-primary-glow {
+            background: var(--blue-gradient);
+            border: none;
+            color: white;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: white;
+        }
+
+        .btn-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary-glow:hover .btn-shine {
+            left: 100%;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 120px;
+            padding-bottom: 60px;
+        }
+
+        .hero-section {
+            margin-bottom: 60px;
+        }
+
+        .hero-icon-wrapper {
+            display: inline-block;
+        }
+
+        .hero-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--white-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: var(--primary-blue);
+            box-shadow: var(--shadow-medium);
+            animation: heroFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--blue-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #475569;
+            font-weight: 400;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            min-width: 120px;
+            box-shadow: var(--shadow-light);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem 1rem;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin: 0;
+        }
+
+        .card-subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 1.5rem 2rem 2rem;
+        }
+
+        /* Area Cards */
+        .area-card {
+            background: var(--white-gradient);
+            border: 2px solid rgba(59, 130, 246, 0.1);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .area-card:hover {
+            border-color: var(--light-blue);
+            box-shadow: var(--shadow-light);
+        }
+
+        .area-card-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(59, 130, 246, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .area-card-header:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .area-badge {
+            width: 40px;
+            height: 40px;
+            background: var(--blue-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .area-number {
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .area-title h5 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .priority-indicator {
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .priority-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .priority-low .priority-dot { background: #10b981; }
+        .priority-medium .priority-dot { background: #f59e0b; }
+        .priority-high .priority-dot { background: #ef4444; }
+
+        .area-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .area-card-body {
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .area-card.expanded .area-card-body {
+            display: block;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--ice-blue);
+        }
+
+        .section-header i {
+            color: var(--primary-blue);
+            margin-right: 0.5rem;
+        }
+
+        .section-header span {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        /* Floating Labels */
+        .floating-label-group {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .floating-input {
+            width: 100%;
+            padding: 1rem 0.75rem 0.5rem;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .floating-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: white;
+        }
+
+        .floating-label {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: transparent;
+            padding: 0;
+        }
+
+        .floating-input:focus + .floating-label,
+        .floating-input:not(:placeholder-shown) + .floating-label {
+            top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn-success-glow {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+
+        .btn-warning-glow {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+            color: white;
+        }
+
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-ripple::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-ripple:hover::after {
+            left: 100%;
+        }
+
+        /* Progress Circle */
+        .progress-circle-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-blue) 0deg, var(--ice-blue) 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .progress-percentage {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .progress-label {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Resource Grid */
+        .resource-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: var(--white-gradient);
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .resource-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            font-size: 18px;
+        }
+
+        .resource-icon.medical {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+        }
+
+        .resource-icon.food {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+
+        .resource-icon.shelter {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+        }
+
+        .resource-icon.personnel {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+        }
+
+        .resource-info {
+            flex: 1;
+        }
+
+        .resource-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .resource-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        /* Modal */
+        .glass-modal .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(59, 130, 246, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Toast */
+        .toast {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .stats-row {
+                gap: 1rem;
+            }
+            
+            .resource-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .area-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .area-actions {
+                margin-left: 0;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .show-advanced-btn {
+            transition: all 0.3s ease;
+        }
+
+        .show-advanced-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .advanced-section {
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+                transform: translateY(0);
+            }
+        }
+
+        /* Priority Results Display */
+        .results-container {
+            margin-top: 2rem;
+        }
+
+        .result-item {
+            background: var(--white-gradient);
+            border: 2px solid rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            border-color: var(--light-blue);
+            box-shadow: var(--shadow-light);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .result-rank {
+            background: var(--blue-gradient);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        .result-score {
+            margin-left: auto;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="background-animation">
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+        <div class="floating-orb orb-4"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top glass-navbar">
+        <div class="container-fluid px-4">
+            <div class="navbar-brand d-flex align-items-center">
+                <div class="brand-logo">
+                    <div class="logo-icon">
+                        <i class="bi bi-shield-fill-plus"></i>
+                    </div>
+                    <div class="logo-pulse"></div>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-0 brand-title">Disaster Aid Hub</h5>
+                    <small class="brand-subtitle">Advanced Emergency Response System</small>
+                </div>
+            </div>
+            
+            <div class="navbar-nav ms-auto d-flex flex-row align-items-center gap-3">
+                <button class="btn btn-glass" id="importBtn">
+                    <i class="bi bi-cloud-arrow-up me-2"></i>Import
+                </button>
+                <button class="btn btn-glass" id="exportBtn">
+                    <i class="bi bi-download me-2"></i>Export
+                </button>
+                <button class="btn btn-primary-glow" id="processBtn">
+                    <i class="bi bi-cpu me-2"></i>Analyze
+                    <div class="btn-shine"></div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid px-4 main-content">
+        <!-- Header Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="hero-section text-center">
+                    <div class="hero-icon-wrapper mb-4">
+                        <div class="hero-icon">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                    </div>
+                    <h1 class="hero-title mb-3">Emergency Response Coordinator</h1>
+                    <p class="hero-subtitle">Intelligent disaster assessment and resource allocation platform</p>
+                    <div class="stats-row mt-4">
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalAreas">0</div>
+                            <div class="stat-label">Areas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalPopulation">0</div>
+                            <div class="stat-label">Population</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalInjuries">0</div>
+                            <div class="stat-label">Casualties</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="criticalAreas">0</div>
+                            <div class="stat-label">Critical</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="row g-4">
+            <!-- Left Panel - Input Forms -->
+            <div class="col-lg-8">
+                <div class="glass-card main-form-card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="card-title mb-2">
+                                    <i class="bi bi-plus-square me-3"></i>Area Assessment
+                                </h4>
+                                <p class="card-subtitle">Configure disaster zones and resource requirements</p>
+                            </div>
+                            <button class="btn btn-success-glow" id="addAreaBtn">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                New Area
+                                <div class="btn-ripple"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="areas-container" id="areasContainer">
+                            <!-- Initial area will be added by JavaScript -->
+                        </div>
+                        
+                        <!-- Results Container -->
+                        <div class="results-container" id="resultsContainer" style="display: none;">
+                            <h5 class="mb-3">
+                                <i class="bi bi-list-ol me-2"></i>Priority Analysis Results
+                            </h5>
+                            <div id="priorityResults"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Analytics & Controls -->
+            <div class="col-lg-4">
+                <!-- Quick Actions -->
+                <div class="glass-card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="bi bi-lightning-charge me-2"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <button class="btn btn-primary-glow btn-lg" id="runAnalysis">
+                                <i class="bi bi-cpu me-2"></i>
+                                Run ML Analysis
+                                <div class="btn-shine"></div>
+                            </button>
+                            <button class="btn btn-success-glow" id="validateData">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Validate Data
+                            </button>
+                            <button class="btn btn-warning-glow" id="clearAll">
+                                <i class="bi bi-arrow-clockwise me-2"></i>
+                                Reset All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Tracker -->
+                <div class="glass-card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="bi bi-graph-up me-2"></i>Progress
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress-circle-container mb-3">
+                            <div class="progress-circle" id="progressCircle">
+                                <div class="progress-text">
+                                    <span class="progress-percentage" id="progressPercentage">0%</span>
+                                    <span class="progress-label">Complete</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="progress-details">
+                            <div class="d-flex justify-content-between">
+                                <span>Data Completeness</span>
+                                <span id="progressText">0/0 fields</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resource Requirements -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="bi bi-box-seam me-2"></i>Resource Overview
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-grid">
+                            <div class="resource-item">
+                                <div class="resource-icon medical">
+                                    <i class="bi bi-heart-pulse"></i>
+                                </div>
+                                <div class="resource-info">
+                                    <div class="resource-label">Medical Units</div>
+                                    <div class="resource-value" id="medicalNeeded">0</div>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <div class="resource-icon food">
+                                    <i class="bi bi-cup-straw"></i>
+                                </div>
+                                <div class="resource-info">
+                                    <div class="resource-label">Food Packages</div>
+                                    <div class="resource-value" id="foodNeeded">0</div>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <div class="resource-icon shelter">
+                                    <i class="bi bi-house-heart"></i>
+                                </div>
+                                <div class="resource-info">
+                                    <div class="resource-label">Shelter Units</div>
+                                    <div class="resource-value" id="shelterNeeded">0</div>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <div class="resource-icon personnel">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div class="resource-info">
+                                    <div class="resource-label">Personnel</div>
+                                    <div class="resource-value" id="personnelNeeded">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Input (Hidden) -->
+    <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer">
+    </div>
+
+    <!-- Modal for Confirmations -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-modal">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="modalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    Are you sure you want to proceed?
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary-glow" id="confirmBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing...</div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Application State
+        let areas = [];
+        let areaIdCounter = 1;
+
+        // DOM Elements
+        const areasContainer = document.getElementById('areasContainer');
+        const addAreaBtn = document.getElementById('addAreaBtn');
+        const runAnalysisBtn = document.getElementById('runAnalysis');
+        const validateDataBtn = document.getElementById('validateData');
+        const clearAllBtn = document.getElementById('clearAll');
+        const importBtn = document.getElementById('importBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const processBtn = document.getElementById('processBtn');
+        const csvFileInput = document.getElementById('csvFileInput');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        // Statistics Elements
+        const totalAreasEl = document.getElementById('totalAreas');
+        const totalPopulationEl = document.getElementById('totalPopulation');
+        const totalInjuriesEl = document.getElementById('totalInjuries');
+        const criticalAreasEl = document.getElementById('criticalAreas');
+
+        // Progress Elements
+        const progressCircle = document.getElementById('progressCircle');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const progressText = document.getElementById('progressText');
+
+        // Resource Elements
+        const medicalNeededEl = document.getElementById('medicalNeeded');
+        const foodNeededEl = document.getElementById('foodNeeded');
+        const shelterNeededEl = document.getElementById('shelterNeeded');
+        const personnelNeededEl = document.getElementById('personnelNeeded');
+
+        // Area Template
+        function createAreaTemplate(id) {
+            return `
+                <div class="area-card fade-in" data-area-id="${id}">
+                    <div class="area-card-header" onclick="toggleAreaCard(${id})">
+                        <div class="area-badge">
+                            <span class="area-number">${String(id).padStart(2, '0')}</span>
+                        </div>
+                        <div class="area-title">
+                            <h5>Disaster Zone ${String.fromCharCode(64 + id)}</h5>
+                            <div class="priority-indicator priority-medium">
+                                <span class="priority-dot"></span>
+                                Medium Priority
+                            </div>
+                        </div>
+                        <div class="area-actions">
+                            <button class="btn btn-sm btn-outline-secondary expand-btn" onclick="event.stopPropagation()">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger remove-btn" onclick="event.stopPropagation(); removeArea(${id})">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="area-card-body">
+                        <!-- Basic Information -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <span>Basic Information</span>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <input type="text" class="form-control floating-input" id="areaName${id}" placeholder=" " onchange="updateAreaData(${id})">
+                                        <label for="areaName${id}" class="floating-label">
+                                            <i class="bi bi-geo-alt me-2"></i>Area Name
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <input type="number" class="form-control floating-input" id="population${id}" placeholder=" " onchange="updateAreaData(${id})">
+                                        <label for="population${id}" class="floating-label">
+                                            <i class="bi bi-people me-2"></i>Total Population
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <select class="form-select floating-input" id="disasterType${id}" onchange="updateAreaData(${id})">
+                                            <option value="">Select disaster type</option>
+                                            <option value="flood">Flood</option>
+                                            <option value="earthquake">Earthquake</option>
+                                            <option value="fire">Fire</option>
+                                            <option value="landslide">Landslide</option>
+                                            <option value="cyclone">Cyclone</option>
+                                            <option value="tsunami">Tsunami</option>
+                                            <option value="drought">Drought</option>
+                                        </select>
+                                        <label for="disasterType${id}" class="floating-label">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>Disaster Type
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <select class="form-select floating-input" id="severity${id}" onchange="updateAreaData(${id})">
+                                            <option value="1">1 - Minor Impact</option>
+                                            <option value="2">2 - Moderate Impact</option>
+                                            <option value="3">3 - Significant Impact</option>
+                                            <option value="4">4 - Major Impact</option>
+                                            <option value="5">5 - Catastrophic</option>
+                                        </select>
+                                        <label for="severity${id}" class="floating-label">
+                                            <i class="bi bi-speedometer me-2"></i>Severity Level
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Impact Assessment -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="bi bi-graph-up-arrow"></i>
+                                <span>Impact Assessment</span>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="floating-label-group">
+                                        <input type="number" class="form-control floating-input" id="injuries${id}" placeholder=" " onchange="updateAreaData(${id})">
+                                        <label for="injuries${id}" class="floating-label">
+                                            <i class="bi bi-bandaid me-2"></i>Estimated Injuries
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="floating-label-group">
+                                        <input type="number" class="form-control floating-input" id="displaced${id}" placeholder=" " onchange="updateAreaData(${id})">
+                                        <label for="displaced${id}" class="floating-label">
+                                            <i class="bi bi-house-x me-2"></i>Displaced People
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="floating-label-group">
+                                        <input type="number" class="form-control floating-input" id="density${id}" placeholder=" " onchange="updateAreaData(${id})">
+                                        <label for="density${id}" class="floating-label">
+                                            <i class="bi bi-grid me-2"></i>Population Density
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Section (Initially Hidden) -->
+                        <div class="form-section advanced-section" style="display: none;">
+                            <div class="section-header">
+                                <i class="bi bi-gear-fill"></i>
+                                <span>Advanced Configuration</span>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <input type="number" class="form-control floating-input" id="elderly${id}" placeholder=" " step="0.1" onchange="updateAreaData(${id})">
+                                        <label for="elderly${id}" class="floating-label">
+                                            <i class="bi bi-person-wheelchair me-2"></i>Elderly Population (%)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <input type="number" class="form-control floating-input" id="children${id}" placeholder=" " step="0.1" onchange="updateAreaData(${id})">
+                                        <label for="children${id}" class="floating-label">
+                                            <i class="bi bi-person-arms-up me-2"></i>Children Population (%)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <select class="form-select floating-input" id="urbanRural${id}" onchange="updateAreaData(${id})">
+                                            <option value="">Select classification</option>
+                                            <option value="urban">Urban</option>
+                                            <option value="rural">Rural</option>
+                                            <option value="semi-urban">Semi-Urban</option>
+                                        </select>
+                                        <label for="urbanRural${id}" class="floating-label">
+                                            <i class="bi bi-building me-2"></i>Area Type
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label-group">
+                                        <input type="number" class="form-control floating-input" id="hospitalDistance${id}" placeholder=" " step="0.1" onchange="updateAreaData(${id})">
+                                        <label for="hospitalDistance${id}" class="floating-label">
+                                            <i class="bi bi-hospital me-2"></i>Distance to Hospital (km)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expand Button -->
+                        <div class="text-center mt-4">
+                            <button class="btn btn-outline-primary show-advanced-btn" onclick="toggleAdvancedSection(${id})">
+                                <i class="bi bi-chevron-double-down me-2"></i>
+                                Show Advanced Options
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize app with first area
+        function initializeApp() {
+            addArea();
+            updateStatistics();
+            updateProgress();
+            updateResourceRequirements();
+        }
+
+        // Add new area
+        function addArea() {
+            const id = areaIdCounter++;
+            const areaHtml = createAreaTemplate(id);
+            areasContainer.insertAdjacentHTML('beforeend', areaHtml);
+            
+            areas.push({
+                id: id,
+                areaName: '',
+                population: 0,
+                disasterType: '',
+                severity: 3,
+                injuries: 0,
+                displaced: 0,
+                density: 0,
+                elderly: 0,
+                children: 0,
+                urbanRural: '',
+                hospitalDistance: 0
+            });
+
+            updateStatistics();
+            showToast('Area added successfully', 'success');
+        }
+
+        // Remove area
+        function removeArea(id) {
+            if (areas.length <= 1) {
+                showToast('At least one area must remain', 'warning');
+                return;
+            }
+
+            document.querySelector(`[data-area-id="${id}"]`).remove();
+            areas = areas.filter(area => area.id !== id);
+            updateStatistics();
+            updateProgress();
+            updateResourceRequirements();
+            showToast('Area removed', 'info');
+        }
+
+        // Toggle area card expansion
+        function toggleAreaCard(id) {
+            const card = document.querySelector(`[data-area-id="${id}"]`);
+            const body = card.querySelector('.area-card-body');
+            const icon = card.querySelector('.expand-btn i');
+            
+            if (card.classList.contains('expanded')) {
+                card.classList.remove('expanded');
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            } else {
+                card.classList.add('expanded');
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            }
+        }
+
+        // Toggle advanced section
+        function toggleAdvancedSection(id) {
+            const card = document.querySelector(`[data-area-id="${id}"]`);
+            const advancedSection = card.querySelector('.advanced-section');
+            const btn = card.querySelector('.show-advanced-btn');
+            const icon = btn.querySelector('i');
+            
+            if (advancedSection.style.display === 'none') {
+                advancedSection.style.display = 'block';
+                btn.innerHTML = '<i class="bi bi-chevron-double-up me-2"></i>Hide Advanced Options';
+            } else {
+                advancedSection.style.display = 'none';
+                btn.innerHTML = '<i class="bi bi-chevron-double-down me-2"></i>Show Advanced Options';
+            }
+        }
+
+        // Update area data
+        function updateAreaData(id) {
+            const areaIndex = areas.findIndex(area => area.id === id);
+            if (areaIndex === -1) return;
+
+            const area = areas[areaIndex];
+            area.areaName = document.getElementById(`areaName${id}`).value;
+            area.population = parseInt(document.getElementById(`population${id}`).value) || 0;
+            area.disasterType = document.getElementById(`disasterType${id}`).value;
+            area.severity = parseInt(document.getElementById(`severity${id}`).value) || 3;
+            area.injuries = parseInt(document.getElementById(`injuries${id}`).value) || 0;
+            area.displaced = parseInt(document.getElementById(`displaced${id}`).value) || 0;
+            area.density = parseFloat(document.getElementById(`density${id}`).value) || 0;
+            area.elderly = parseFloat(document.getElementById(`elderly${id}`).value) || 0;
+            area.children = parseFloat(document.getElementById(`children${id}`).value) || 0;
+            area.urbanRural = document.getElementById(`urbanRural${id}`).value;
+            area.hospitalDistance = parseFloat(document.getElementById(`hospitalDistance${id}`).value) || 0;
+
+            updatePriorityIndicator(id, area);
+            updateStatistics();
+            updateProgress();
+            updateResourceRequirements();
+        }
+
+        // Update priority indicator
+        function updatePriorityIndicator(id, area) {
+            const card = document.querySelector(`[data-area-id="${id}"]`);
+            const indicator = card.querySelector('.priority-indicator');
+            
+            let priority = 'medium';
+            let priorityText = 'Medium Priority';
+            
+            // Simple priority calculation
+            const priorityScore = (area.severity * 0.3) + 
+                                 ((area.injuries / Math.max(area.population, 1)) * 100 * 0.3) +
+                                 ((area.displaced / Math.max(area.population, 1)) * 100 * 0.2) +
+                                 (area.density * 0.2);
+            
+            if (priorityScore > 3) {
+                priority = 'high';
+                priorityText = 'High Priority';
+            } else if (priorityScore < 1.5) {
+                priority = 'low';
+                priorityText = 'Low Priority';
+            }
+            
+            indicator.className = `priority-indicator priority-${priority}`;
+            indicator.innerHTML = `<span class="priority-dot"></span>${priorityText}`;
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const totalAreas = areas.length;
+            const totalPopulation = areas.reduce((sum, area) => sum + area.population, 0);
+            const totalInjuries = areas.reduce((sum, area) => sum + area.injuries, 0);
+            const criticalAreas = areas.filter(area => area.severity >= 4).length;
+
+            animateNumber(totalAreasEl, totalAreas);
+            animateNumber(totalPopulationEl, totalPopulation);
+            animateNumber(totalInjuriesEl, totalInjuries);
+            animateNumber(criticalAreasEl, criticalAreas);
+        }
+
+        // Update progress
+        function updateProgress() {
+            let totalFields = 0;
+            let filledFields = 0;
+
+            areas.forEach(area => {
+                const requiredFields = ['areaName', 'population', 'disasterType', 'severity'];
+                requiredFields.forEach(field => {
+                    totalFields++;
+                    if (area[field] && area[field] !== '') filledFields++;
+                });
+            });
+
+            const percentage = totalFields > 0 ? Math.round((filledFields / totalFields) * 100) : 0;
+            
+            progressPercentage.textContent = `${percentage}%`;
+            progressText.textContent = `${filledFields}/${totalFields} fields`;
+            
+            const degree = (percentage / 100) * 360;
+            progressCircle.style.background = `conic-gradient(var(--primary-blue) ${degree}deg, var(--ice-blue) ${degree}deg)`;
+        }
+
+        // Update resource requirements
+        function updateResourceRequirements() {
+            let medical = 0, food = 0, shelter = 0, personnel = 0;
+
+            areas.forEach(area => {
+                // Simple resource calculation based on population and severity
+                const baseFactor = area.population * (area.severity / 5);
+                
+                medical += Math.ceil(area.injuries * 0.1 + baseFactor * 0.05);
+                food += Math.ceil(area.displaced * 3 + baseFactor * 0.5); // 3 meals per displaced person
+                shelter += Math.ceil(area.displaced * 0.25); // 4 people per shelter unit
+                personnel += Math.ceil(baseFactor * 0.1);
+            });
+
+            animateNumber(medicalNeededEl, medical);
+            animateNumber(foodNeededEl, food);
+            animateNumber(shelterNeededEl, shelter);
+            animateNumber(personnelNeededEl, personnel);
+        }
+
+        // Animate number changes
+        function animateNumber(element, targetNumber) {
+            const currentNumber = parseInt(element.textContent) || 0;
+            const difference = targetNumber - currentNumber;
+            const steps = 20;
+            const stepSize = difference / steps;
+            let current = currentNumber;
+
+            const timer = setInterval(() => {
+                current += stepSize;
+                if (Math.abs(current - targetNumber) < Math.abs(stepSize)) {
+                    element.textContent = targetNumber.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.round(current).toLocaleString();
+                }
+            }, 30);
+        }
+
+        // ML Analysis function
+        function runMLAnalysis() {
+            if (areas.length === 0) {
+                showToast('No areas to analyze', 'warning');
+                return;
+            }
+
+            showLoading('Analyzing disaster zones...');
+
+            // Simulate ML processing
+            setTimeout(() => {
+                const analysisResults = areas.map((area, index) => {
+                    const priorityScore = calculatePriorityScore(area);
+                    return {
+                        ...area,
+                        priorityScore: priorityScore,
+                        rank: index + 1
+                    };
+                }).sort((a, b) => b.priorityScore - a.priorityScore)
+                  .map((area, index) => ({ ...area, rank: index + 1 }));
+
+                displayAnalysisResults(analysisResults);
+                hideLoading();
+                showToast('Analysis completed successfully', 'success');
+            }, 2000);
+        }
+
+        // Calculate priority score
+        function calculatePriorityScore(area) {
+            let score = 0;
+            
+            // Severity weight (0-5) * 20 = 0-100
+            score += area.severity * 20;
+            
+            // Population density weight
+            score += Math.min(area.density * 5, 50);
+            
+            // Injury rate weight
+            const injuryRate = area.population > 0 ? (area.injuries / area.population) * 100 : 0;
+            score += Math.min(injuryRate * 10, 30);
+            
+            // Displacement rate weight  
+            const displacementRate = area.population > 0 ? (area.displaced / area.population) * 100 : 0;
+            score += Math.min(displacementRate * 5, 20);
+            
+            // Vulnerable population weight
+            const vulnerableRate = area.elderly + area.children;
+            score += Math.min(vulnerableRate * 0.5, 15);
+            
+            // Hospital distance weight (inverse)
+            if (area.hospitalDistance > 0) {
+                score += Math.min((1 / area.hospitalDistance) * 20, 10);
+            }
+            
+            // Urban/rural modifier
+            if (area.urbanRural === 'urban') score += 5;
+            else if (area.urbanRural === 'rural') score += 10;
+            
+            return Math.round(score * 100) / 100;
+        }
+
+        // Display analysis results
+        function displayAnalysisResults(results) {
+            const resultsHtml = results.map(area => `
+                <div class="result-item fade-in">
+                    <div class="result-header">
+                        <div class="result-rank">${area.rank}</div>
+                        <div>
+                            <h6 class="mb-1">${area.areaName || `Zone ${String.fromCharCode(64 + area.id)}`}</h6>
+                            <small class="text-muted">${area.disasterType || 'Unknown'} - Severity ${area.severity}</small>
+                        </div>
+                        <div class="result-score">${area.priorityScore}</div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted">Population</small>
+                            <div class="fw-bold">${area.population.toLocaleString()}</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted">Injuries</small>
+                            <div class="fw-bold text-danger">${area.injuries.toLocaleString()}</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted">Displaced</small>
+                            <div class="fw-bold text-warning">${area.displaced.toLocaleString()}</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted">Density</small>
+                            <div class="fw-bold">${area.density}/km²</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('priorityResults').innerHTML = resultsHtml;
+            resultsContainer.style.display = 'block';
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Validate data
+        function validateData() {
+            let errors = [];
+
+            areas.forEach((area, index) => {
+                if (!area.areaName) errors.push(`Area ${index + 1}: Name is required`);
+                if (area.population <= 0) errors.push(`Area ${index + 1}: Population must be greater than 0`);
+                if (!area.disasterType) errors.push(`Area ${index + 1}: Disaster type is required`);
+                if (area.injuries > area.population) errors.push(`Area ${index + 1}: Injuries cannot exceed population`);
+                if (area.displaced > area.population) errors.push(`Area ${index + 1}: Displaced cannot exceed population`);
+            });
+
+            if (errors.length === 0) {
+                showToast('All data is valid', 'success');
+            } else {
+                showToast(`${errors.length} validation errors found`, 'error');
+                console.log('Validation errors:', errors);
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            document.getElementById('modalTitle').textContent = 'Clear All Data';
+            document.getElementById('modalBody').textContent = 'This will remove all areas and reset the application. This action cannot be undone.';
+            
+            document.getElementById('confirmBtn').onclick = function() {
+                areas = [];
+                areaIdCounter = 1;
+                areasContainer.innerHTML = '';
+                resultsContainer.style.display = 'none';
+                addArea();
+                updateStatistics();
+                updateProgress();
+                updateResourceRequirements();
+                confirmModal.hide();
+                showToast('All data cleared', 'info');
+            };
+            
+            confirmModal.show();
+        }
+
+        // Export data to CSV
+        function exportData() {
+            if (areas.length === 0) {
+                showToast('No data to export', 'warning');
+                return;
+            }
+
+            const headers = [
+                'Area Name', 'Population', 'Disaster Type', 'Severity', 'Injuries', 'Displaced',
+                'Density', 'Elderly %', 'Children %', 'Area Type', 'Hospital Distance'
+            ];
+
+            const csvContent = [
+                headers.join(','),
+                ...areas.map(area => [
+                    area.areaName || `Zone ${String.fromCharCode(64 + area.id)}`,
+                    area.population,
+                    area.disasterType,
+                    area.severity,
+                    area.injuries,
+                    area.displaced,
+                    area.density,
+                    area.elderly,
+                     area.children,
+                    area.urbanRural,
+                    area.hospitalDistance
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `disaster_zones_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showToast('Data exported successfully', 'success');
+        }
+
+        // Import data from CSV
+        function importData() {
+            csvFileInput.click();
+        }
+
+        // Handle CSV file import
+        csvFileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    const headers = lines[0].split(',');
+                    
+                    // Clear existing areas
+                    areas = [];
+                    areaIdCounter = 1;
+                    areasContainer.innerHTML = '';
+
+                    // Parse CSV data
+                    for (let i = 1; i < lines.length; i++) {
+                        if (lines[i].trim() === '') continue;
+                        
+                        const values = lines[i].split(',');
+                        if (values.length >= 6) {
+                            const id = areaIdCounter++;
+                            areas.push({
+                                id: id,
+                                areaName: values[0] || '',
+                                population: parseInt(values[1]) || 0,
+                                disasterType: values[2] || '',
+                                severity: parseInt(values[3]) || 3,
+                                injuries: parseInt(values[4]) || 0,
+                                displaced: parseInt(values[5]) || 0,
+                                density: parseFloat(values[6]) || 0,
+                                elderly: parseFloat(values[7]) || 0,
+                                children: parseFloat(values[8]) || 0,
+                                urbanRural: values[9] || '',
+                                hospitalDistance: parseFloat(values[10]) || 0
+                            });
+
+                            // Create area card
+                            const areaHtml = createAreaTemplate(id);
+                            areasContainer.insertAdjacentHTML('beforeend', areaHtml);
+                            
+                            // Populate fields
+                            setTimeout(() => {
+                                document.getElementById(`areaName${id}`).value = areas[areas.length - 1].areaName;
+                                document.getElementById(`population${id}`).value = areas[areas.length - 1].population;
+                                document.getElementById(`disasterType${id}`).value = areas[areas.length - 1].disasterType;
+                                document.getElementById(`severity${id}`).value = areas[areas.length - 1].severity;
+                                document.getElementById(`injuries${id}`).value = areas[areas.length - 1].injuries;
+                                document.getElementById(`displaced${id}`).value = areas[areas.length - 1].displaced;
+                                document.getElementById(`density${id}`).value = areas[areas.length - 1].density;
+                                document.getElementById(`elderly${id}`).value = areas[areas.length - 1].elderly;
+                                document.getElementById(`children${id}`).value = areas[areas.length - 1].children;
+                                document.getElementById(`urbanRural${id}`).value = areas[areas.length - 1].urbanRural;
+                                document.getElementById(`hospitalDistance${id}`).value = areas[areas.length - 1].hospitalDistance;
+                            }, 100);
+                        }
+                    }
+
+                    updateStatistics();
+                    updateProgress();
+                    updateResourceRequirements();
+                    showToast(`Imported ${areas.length} areas successfully`, 'success');
+
+                } catch (error) {
+                    console.error('Import error:', error);
+                    showToast('Error importing CSV file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Show loading overlay
+        function showLoading(text = 'Processing...') {
+            document.querySelector('.loading-text').textContent = text;
+            loadingOverlay.style.display = 'flex';
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toastId = 'toast' + Date.now();
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'primary'} border-0" role="alert" id="${toastId}">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('toastContainer').insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+            toast.show();
+            
+            // Remove toast element after it's hidden
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+
+        // Event listeners
+        addAreaBtn.addEventListener('click', addArea);
+        runAnalysisBtn.addEventListener('click', runMLAnalysis);
+        processBtn.addEventListener('click', runMLAnalysis);
+        validateDataBtn.addEventListener('click', validateData);
+        clearAllBtn.addEventListener('click', clearAllData);
+        importBtn.addEventListener('click', importData);
+        exportBtn.addEventListener('click', exportData);
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            
+            // Add smooth scrolling to all anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Add enhanced animations on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards for animation
+            document.querySelectorAll('.glass-card, .area-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + N = New Area
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                addArea();
+            }
+            
+            // Ctrl/Cmd + R = Run Analysis
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                runMLAnalysis();
+            }
+            
+            // Ctrl/Cmd + S = Export Data
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                exportData();
+            }
+            
+            // Ctrl/Cmd + O = Import Data
+            if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+                e.preventDefault();
+                importData();
+            }
+        });
+
+        // Add window resize handler for responsive behavior
+        window.addEventListener('resize', function() {
+            // Adjust layouts if needed
+            if (window.innerWidth < 768) {
+                document.querySelectorAll('.area-card.expanded').forEach(card => {
+                    // Keep expanded state but adjust styling
+                    card.classList.add('mobile-expanded');
+                });
+            } else {
+                document.querySelectorAll('.mobile-expanded').forEach(card => {
+                    card.classList.remove('mobile-expanded');
+                });
+            }
+        });
+
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            console.error('Application error:', e.error);
+            showToast('An unexpected error occurred. Please refresh the page.', 'error');
+        });
+
+        // Add service worker for offline capability (if needed)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Service worker registration code would go here
+                // navigator.serviceWorker.register('/sw.js')
+            });
+        }
+
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            const loadTime = performance.now();
+            if (loadTime > 3000) {
+                console.warn('Slow page load detected:', loadTime + 'ms');
+            }
+        });
+
+        // Add auto-save functionality (saves to localStorage)
+        function autoSave() {
+            try {
+                const appData = {
+                    areas: areas,
+                    areaIdCounter: areaIdCounter,
+                    timestamp: Date.now()
+                };
+                // Note: localStorage is not available in Claude artifacts
+                // This would work in a real environment
+                // localStorage.setItem('disasterAidData', JSON.stringify(appData));
+            } catch (error) {
+                console.log('Auto-save not available in this environment');
+            }
+        }
+
+        // Auto-save every 30 seconds
+        setInterval(autoSave, 30000);
+
+        // Load saved data on startup (would work with localStorage)
+        function loadSavedData() {
+            try {
+                // const savedData = localStorage.getItem('disasterAidData');
+                // if (savedData) {
+                //     const data = JSON.parse(savedData);
+                //     if (data.areas && data.areas.length > 0) {
+                //         areas = data.areas;
+                //         areaIdCounter = data.areaIdCounter || areas.length + 1;
+                //         // Rebuild UI with saved data
+                //     }
+                // }
+            } catch (error) {
+                console.log('No saved data available');
+            }
+        }
+    </script>
+</body>
+</html>

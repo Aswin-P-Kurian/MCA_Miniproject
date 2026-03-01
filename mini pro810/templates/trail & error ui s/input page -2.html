@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pre-Disaster Aid Prioritizer — Input Panel</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1: #0f172a;
+      --accent1: #5eead4;
+      --accent2: #7c3aed;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.08);
+    }
+    html,body{height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    body{
+      margin:0;
+      background: radial-gradient(ellipse at 10% 10%, rgba(124,58,237,0.15) 0%, transparent 20%),
+                  radial-gradient(ellipse at 90% 80%, rgba(94,234,212,0.08) 0%, transparent 20%),
+                  linear-gradient(180deg, #071024 0%, #071b2e 55%, #0b2237 100%);
+      color:#e6eef8;
+      padding:24px;
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:20px;
+    }
+    .brand {
+      display:flex;align-items:center;gap:12px;
+    }
+    .brand .logo {
+      width:46px;height:46px;border-radius:10px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent2),var(--accent1));
+      box-shadow: 0 6px 20px rgba(124,58,237,0.18);
+      font-weight:800;color:#fff;font-size:20px;
+    }
+    .brand h1{font-size:18px;margin:0;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+    .brand p{margin:0;font-size:12px;color:#cfe9e0;opacity:0.9}
+
+    /* Layout cards */
+    .card-glass{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid var(--glass-border);
+      border-radius:14px;
+      padding:16px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      color: #e9f8f4;
+    }
+
+    /* Left column area row card */
+    .area-row {
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom:12px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    .small-muted { color:#bcded3; font-size:12px; }
+
+    /* Predicted badges */
+    .badge-priority-high{background:linear-gradient(45deg,#ff5f6d,#ffc371);color:#071024;font-weight:700;border-radius:8px;padding:6px 10px}
+    .badge-priority-medium{background:linear-gradient(45deg,#ffd66b,#f2a54a);color:#071024;font-weight:700;border-radius:8px;padding:6px 10px}
+    .badge-priority-low{background:linear-gradient(45deg,#8bf6d4,#4fd1c5);color:#022; font-weight:700;border-radius:8px;padding:6px 10px}
+
+    /* Right panel */
+    .stat-box{ padding:18px;border-radius:12px;margin-bottom:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+    .stat-number{font-size:28px;font-weight:800;color:#fff}
+    .muted{color:#bdece3}
+
+    /* Buttons */
+    .btn-grad{ background: linear-gradient(90deg,#6a11cb,#2575fc); color:white; border:none; box-shadow: 0 6px 18px rgba(37,117,252,0.12); }
+    .btn-soft{ background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); color:#e6f8f1; }
+
+    /* responsive tweaks */
+    @media(max-width:1000px){
+      .brand h1{font-size:16px}
+    }
+    @media(max-width:768px){
+      body{padding:12px}
+    }
+
+    /* Slight input look */
+    input.form-control, select.form-select, textarea.form-control {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      color: #e9f8f4;
+      box-shadow: none;
+    }
+    input::placeholder{ color: rgba(255,255,255,0.3); }
+    label.form-label{ color:#bfeee5; font-weight:600; font-size:0.85rem; }
+
+    /* file preview */
+    .file-preview { font-size:13px; color:#bfeee5; margin-top:6px; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">PA</div>
+      <div>
+        <h1>Pre-Disaster Aid Prioritizer</h1>
+        <p class="small-muted">Data entry & prediction — add areas, compute, export</p>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center">
+      <button class="btn btn-soft me-2" id="importCsvBtn"><i class="bi bi-file-earmark-arrow-up me-1"></i>Import CSV</button>
+      <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
+      <button class="btn btn-soft me-2" id="uploadFilesBtn"><i class="bi bi-image me-1"></i>Upload Maps</button>
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none" />
+      <button class="btn btn-grad" id="submitBtn"><i class="bi bi-send me-1"></i>Submit to Model</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left: Inputs -->
+    <div class="col-lg-8">
+      <div class="card-glass">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="mb-0">Area Inputs</h5>
+            <div class="small-muted">Add one or more areas. Click Compute to preview derived fields. Use Submit to call the ML API.</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-soft" id="addRowBtn"><i class="bi bi-plus-lg me-1"></i>Add Area</button>
+            <button class="btn btn-soft" id="duplicateRowBtn"><i class="bi bi-files me-1"></i>Duplicate</button>
+            <button class="btn btn-soft" id="computeAllBtn"><i class="bi bi-calculator me-1"></i>Compute All</button>
+            <button class="btn btn-soft" id="exportBtn"><i class="bi bi-download me-1"></i>Export CSV</button>
+          </div>
+        </div>
+
+        <!-- rows container -->
+        <div id="rowsContainer">
+          <!-- Template row -->
+          <div class="area-row" data-row-id="0">
+            <div class="row gy-2">
+              <div class="col-12 d-flex justify-content-between align-items-center mb-1">
+                <strong>Area 1</strong>
+                <div class="small-muted">Row actions: <button class="btn btn-sm btn-outline-danger btn-remove-row">Remove</button></div>
+              </div>
+
+              <!-- Row fields -->
+              <div class="col-md-6">
+                <label class="form-label">Area Name</label>
+                <input type="text" class="form-control field-area-name" placeholder="e.g., District A" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Population</label>
+                <input type="number" class="form-control field-population" placeholder="50000" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Population Density</label>
+                <input type="number" class="form-control field-popdensity" placeholder="1200" />
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label">Type of Disaster</label>
+                <select class="form-select field-disaster">
+                  <option>Flood</option><option>Earthquake</option><option>Fire</option><option>Landslide</option><option>Cyclone</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Severity (1-5)</label>
+                <select class="form-select field-severity">
+                  <option value="1">1 - Low</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 - Critical</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Road Accessibility (1-5)</label>
+                <select class="form-select field-road">
+                  <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Infrastructure Damaged (%)</label>
+                <input type="number" class="form-control field-infra" step="0.1" placeholder="50" />
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label">Distance to Hospital (km)</label>
+                <input type="number" class="form-control field-dist-hosp" step="0.1" placeholder="25" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Distance to City (km)</label>
+                <input type="number" class="form-control field-dist-city" step="0.1" placeholder="100" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Estimated Injuries</label>
+                <input type="number" class="form-control field-injuries" placeholder="300" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Displaced / Homeless</label>
+                <input type="number" class="form-control field-homeless" placeholder="2000" />
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label">Medical Stock (units)</label>
+                <input type="number" class="form-control field-medstock" placeholder="200" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Food Stock (units)</label>
+                <input type="number" class="form-control field-foodstock" placeholder="500" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Internet Available</label>
+                <select class="form-select field-internet"><option>Yes</option><option>No</option></select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Electricity Available</label>
+                <select class="form-select field-electric"><option>Yes</option><option>No</option></select>
+              </div>
+
+              <!-- computed preview -->
+              <div class="col-12 mt-2">
+                <div class="d-flex gap-2 flex-wrap align-items-center">
+                  <div class="badge bg-dark text-light small-muted px-3 py-2">Response Hours: <strong class="ms-2 field-pred-hours">—</strong></div>
+                  <div class="badge bg-dark text-light small-muted px-3 py-2">Economic Loss: <strong class="ms-2 field-pred-loss">—</strong></div>
+                  <div class="badge bg-dark text-light small-muted px-3 py-2">Med Teams: <strong class="ms-2 field-pred-med">—</strong></div>
+                  <div class="badge bg-dark text-light small-muted px-3 py-2">Rescue Teams: <strong class="ms-2 field-pred-rescue">—</strong></div>
+                  <div class="ms-auto">
+                    <span class="field-pred-priority badge-priority-low" style="display:inline-block">Low</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 mt-2 d-flex gap-2 justify-content-end">
+                <button class="btn btn-sm btn-soft btn-compute-row"><i class="bi bi-calculator me-1"></i> Compute</button>
+                <button class="btn btn-sm btn-soft btn-preview"><i class="bi bi-eye me-1"></i> Preview</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right: Stats / Controls -->
+    <div class="col-lg-4">
+      <div class="card-glass p-3">
+        <h6 class="mb-3">Summary</h6>
+        <div class="stat-box mb-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stat-number" id="statTotal">1</div>
+              <div class="muted">Areas added</div>
+            </div>
+            <div>
+              <div class="stat-number" id="statReady">0</div>
+              <div class="muted">Computed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-box mb-2">
+          <div><small class="muted">Priority Mix</small></div>
+          <div class="d-flex gap-2 mt-2">
+            <div class="flex-fill text-center">
+              <div class="muted">High</div>
+              <div id="mixHigh" class="stat-number">0</div>
+            </div>
+            <div class="flex-fill text-center">
+              <div class="muted">Medium</div>
+              <div id="mixMed" class="stat-number">0</div>
+            </div>
+            <div class="flex-fill text-center">
+              <div class="muted">Low</div>
+              <div id="mixLow" class="stat-number">1</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-box mb-2">
+          <h6>Upload & Attach</h6>
+          <div class="small-muted mb-2">Attach reference maps, photos or CSVs for batch import.</div>
+          <button class="btn btn-soft w-100 mb-2" id="uploadMap"><i class="bi bi-upload me-1"></i> Upload Map / Photo</button>
+          <div class="file-preview" id="filePreview">No files uploaded</div>
+        </div>
+
+        <div class="stat-box">
+          <h6>Model Integration</h6>
+          <div class="small-muted">When you connect the backend ML API, the <code>Submit to Model</code> button will POST JSON of all rows. See the JS comment for the exact payload format.</div>
+          <div class="mt-3 small-muted">Example endpoint: <code>/predict</code> (POST, application/json)</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    /* ========== Utilities ========== */
+    function qs(selector, root=document) { return root.querySelector(selector); }
+    function qsa(selector, root=document) { return Array.from(root.querySelectorAll(selector)); }
+    function toNumber(v){ v = parseFloat(v); return isNaN(v)?0:v; }
+    function formatNumber(n){ return (Math.round(n*100)/100).toLocaleString(); }
+
+    /* ========== Row management ========== */
+    let rowCounter = 1;
+    const rowsContainer = qs('#rowsContainer');
+    const templateRow = rowsContainer.querySelector('.area-row');
+
+    // add new blank row
+    function addRow(cloneFrom=null){
+      const newRow = (cloneFrom ? cloneFrom.cloneNode(true) : templateRow.cloneNode(true));
+      rowCounter++;
+      newRow.dataset.rowId = rowCounter;
+      // clear inputs
+      qsa('input, select, textarea', newRow).forEach(el=>{
+        if(el.type==='select-one') el.selectedIndex = 0;
+        else el.value = '';
+      });
+      // ensure first label shows correct area number
+      newRow.querySelector('strong').innerText = `Area ${rowCounter}`;
+      rowsContainer.appendChild(newRow);
+      attachRowEvents(newRow);
+      updateSummary();
+      return newRow;
+    }
+
+    // attach events to row buttons and fields
+    function attachRowEvents(rowEl){
+      // remove
+      const removeBtn = rowEl.querySelector('.btn-remove-row');
+      removeBtn.onclick = ()=>{
+        if(rowsContainer.children.length>1){ rowEl.remove(); updateSummary(); }
+        else { // clear fields
+          qsa('input, select', rowEl).forEach(i=> i.value = ''); updateSummary();
+        }
+      };
+
+      // compute button
+      const computeBtn = rowEl.querySelector('.btn-compute-row');
+      computeBtn.onclick = ()=>{ computeRow(rowEl); updateSummary(); };
+
+      // preview button (open small modal-like highlight)
+      const previewBtn = rowEl.querySelector('.btn-preview');
+      previewBtn.onclick = ()=>{ flashPreview(rowEl); };
+
+      // update summary when certain inputs change
+      qsa('input, select', rowEl).forEach(el=>{
+        el.addEventListener('change', ()=>updateSummary());
+        el.addEventListener('input', ()=>updateSummary());
+      });
+    }
+
+    // compute vulnerability and small derived fields for a row (client-side)
+    function computeRow(rowEl){
+      // gather inputs
+      const pop = toNumber(rowEl.querySelector('.field-population').value);
+      const pdensity = toNumber(rowEl.querySelector('.field-popdensity').value);
+      const severity = toNumber(rowEl.querySelector('.field-severity').value);
+      const road = toNumber(rowEl.querySelector('.field-road').value);
+      const infra = toNumber(rowEl.querySelector('.field-infra').value);
+      const distHosp = toNumber(rowEl.querySelector('.field-dist-hosp').value);
+      const distCity = toNumber(rowEl.querySelector('.field-dist-city').value);
+      const injuries = toNumber(rowEl.querySelector('.field-injuries').value);
+      const homeless = toNumber(rowEl.querySelector('.field-homeless').value);
+      const medstock = toNumber(rowEl.querySelector('.field-medstock').value);
+      const foodstock = toNumber(rowEl.querySelector('.field-foodstock').value);
+      const internet = rowEl.querySelector('.field-internet').value;
+      const electric = rowEl.querySelector('.field-electric').value;
+      const disaster = rowEl.querySelector('.field-disaster').value;
+
+      // --- Compute Response_Urgency_Hours (mirrors earlier mapping + severity)
+      let baseUrgency = {'Fire':8,'Flood':18,'Earthquake':36,'Landslide':24,'Cyclone':48}[disaster] || 36;
+      // adjust by severity and injuries
+      let urgencyAdj = baseUrgency - Math.floor((severity-1)*2) - Math.min(Math.floor(injuries/200), 10);
+      let responseHours = Math.max(4, Math.round(urgencyAdj)); // min 4 hours
+
+      // --- Economic Loss Estimate (simple formula similar to your dataset)
+      // TL;DR: total population * severity * infra% * 0.01 * factor
+      let econFactor = 1 + (pdensity/2000) + ((internet==='No'||electric==='No')?0.2:0);
+      let econLoss = Math.max(100, (pop * severity * (infra/100) * econFactor * 0.01));
+      econLoss = Math.round(econLoss * 100) / 100;
+
+      // --- Medical teams required (heuristic)
+      let medTeams = Math.max(1, Math.round((injuries/40) + (severity*1.5) + ( (100-medstock)/50 )));
+
+      // --- Rescue teams required (heuristic)
+      let rescueTeams = Math.max(1, Math.round((homeless/120) + (severity*2) + (infra/30) + ( (5-road) )));
+
+      // --- Priority classification (simple aggregated score)
+      let score = 0;
+      score += severity * 3;
+      score += Math.min(injuries/100, 6);
+      score += Math.min(homeless/1000, 4);
+      score += infra/25;
+      score += (5 - road);
+      if(distHosp>50) score += 1;
+      // map to label
+      let priorityLabel = 'Low';
+      if(score >= 15) priorityLabel = 'High';
+      else if(score >= 9) priorityLabel = 'Medium';
+      else priorityLabel = 'Low';
+
+      // --- Most urgent need and suggested action (small logic)
+      let need='Rescue', action='Send Rescue Team';
+      if(medstock < 50 || injuries > 200) { need='Medical'; action='Deploy Mobile Clinic'; }
+      else if(foodstock < 200) { need='Food'; action='Send Food Supplies'; }
+      else if(infra > 60 || (distCity>120 && distHosp>60)) { need='Water'; action='Deploy Water Tankers'; }
+      else { need='Rescue'; action='Send Rescue Team'; }
+
+      // write to preview fields
+      rowEl.querySelector('.field-pred-hours').innerText = responseHours;
+      rowEl.querySelector('.field-pred-loss').innerText = formatNumber(econLoss);
+      rowEl.querySelector('.field-pred-med').innerText = medTeams;
+      rowEl.querySelector('.field-pred-rescue').innerText = rescueTeams;
+
+      // set priority badge
+      const badge = rowEl.querySelector('.field-pred-priority');
+      badge.innerText = priorityLabel;
+      badge.className = (priorityLabel==='High' ? 'field-pred-priority badge-priority-high' :
+                         priorityLabel==='Medium' ? 'field-pred-priority badge-priority-medium' :
+                         'field-pred-priority badge-priority-low');
+
+      // mark as computed (for summary)
+      rowEl.dataset.computed = 'true';
+
+      // return computed object
+      return {
+        responseHours, econLoss, medTeams, rescueTeams, priorityLabel, need, action
+      };
+    }
+
+    // small preview animation
+    function flashPreview(rowEl){
+      rowEl.style.transform = 'scale(1.01)';
+      setTimeout(()=> rowEl.style.transform = '', 250);
+    }
+
+    // compute all visible rows
+    function computeAllRows(){
+      qsa('.area-row').forEach(r => computeRow(r));
+      updateSummary();
+      showToast('Computed all rows');
+    }
+
+    /* ========== Summary & Export ========== */
+    function updateSummary(){
+      const rows = qsa('.area-row');
+      qs('#statTotal').innerText = rows.length;
+      let computed = 0;
+      let counts = {High:0, Medium:0, Low:0};
+      rows.forEach(r=>{
+        if(r.dataset.computed==='true') computed++;
+        const p = r.querySelector('.field-pred-priority')?.innerText || 'Low';
+        counts[p] = (counts[p] || 0) + 1;
+      });
+      qs('#statReady').innerText = computed;
+      qs('#mixHigh').innerText = counts.High || 0;
+      qs('#mixMed').innerText = counts.Medium || 0;
+      qs('#mixLow').innerText = counts.Low || 0;
+    }
+
+    // gather data rows into JSON payload for backend
+    function gatherPayload(){
+      const payload = [];
+      qsa('.area-row').forEach(r=>{
+        const obj = {
+          area_name: r.querySelector('.field-area-name').value || 'Unknown',
+          total_population: toNumber(r.querySelector('.field-population').value),
+          population_density: toNumber(r.querySelector('.field-popdensity').value),
+          disaster_type: r.querySelector('.field-disaster').value,
+          severity: toNumber(r.querySelector('.field-severity').value),
+          road_access: toNumber(r.querySelector('.field-road').value),
+          infrastructure_damage_pct: toNumber(r.querySelector('.field-infra').value),
+          distance_hospital_km: toNumber(r.querySelector('.field-dist-hosp').value),
+          distance_city_km: toNumber(r.querySelector('.field-dist-city').value),
+          injuries_est: toNumber(r.querySelector('.field-injuries').value),
+          homeless_est: toNumber(r.querySelector('.field-homeless').value),
+          med_stock: toNumber(r.querySelector('.field-medstock').value),
+          food_stock: toNumber(r.querySelector('.field-foodstock').value),
+          internet: r.querySelector('.field-internet').value,
+          electricity: r.querySelector('.field-electric').value,
+          // computed preview (if already computed)
+          preview: {
+            response_hours: r.querySelector('.field-pred-hours').innerText,
+            economic_loss: r.querySelector('.field-pred-loss').innerText,
+            medical_teams: r.querySelector('.field-pred-med').innerText,
+            rescue_teams: r.querySelector('.field-pred-rescue').innerText,
+            priority: r.querySelector('.field-pred-priority').innerText
+          }
+        };
+        payload.push(obj);
+      });
+      return payload;
+    }
+
+    // Export CSV (includes computed preview)
+    function exportCSV(){
+      const rows = gatherPayload();
+      if(!rows.length){ showToast('No rows to export','danger'); return; }
+      const header = Object.keys(rows[0]).concat(['preview_response_hours','preview_economic_loss','preview_med','preview_rescue','preview_priority']);
+      const lines = [header.join(',')];
+      rows.forEach(r=>{
+        const base = [
+          `"${r.area_name}"`, r.total_population, r.population_density, `"${r.disaster_type}"`, r.severity,
+          r.road_access, r.infrastructure_damage_pct, r.distance_hospital_km, r.distance_city_km, r.injuries_est, r.homeless_est, r.med_stock, r.food_stock, `"${r.internet}"`, `"${r.electricity}"`
+        ];
+        const preview = [ r.preview.response_hours, r.preview.economic_loss, r.preview.medical_teams, r.preview.rescue_teams, `"${r.preview.priority}"` ];
+        lines.push(base.join(',') + ',' + preview.join(','));
+      });
+      const csv = lines.join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'pre_disaster_input_export.csv'; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exported CSV');
+    }
+
+    /* ========== Import CSV (simple mapping) ========== */
+    function importCSVFile(file){
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const text = e.target.result;
+        const rows = text.split(/\r?\n/).filter(Boolean);
+        if(!rows.length) return;
+        const header = rows.shift().split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+        // map each row to fields
+        rows.forEach((r,i)=>{
+          const cols = r.split(',').map(c=>c.trim().replace(/^"|"$/g,''));
+          // for each parsed row, add new row and fill known columns (simple mapping)
+          const newRow = addRow();
+          const map = {};
+          header.forEach((h, idx)=> map[h] = cols[idx] || '');
+          // fill known fields if exist in CSV header
+          if(map['area_name']) newRow.querySelector('.field-area-name').value = map['area_name'];
+          if(map['total_population']) newRow.querySelector('.field-population').value = map['total_population'];
+          if(map['population_density']) newRow.querySelector('.field-popdensity').value = map['population_density'];
+          if(map['disaster_type']) newRow.querySelector('.field-disaster').value = map['disaster_type'];
+          if(map['severity']) newRow.querySelector('.field-severity').value = map['severity'];
+          if(map['road_access']) newRow.querySelector('.field-road').value = map['road_access'];
+          if(map['infrastructure_damage_pct']) newRow.querySelector('.field-infra').value = map['infrastructure_damage_pct'];
+          if(map['distance_hospital_km']) newRow.querySelector('.field-dist-hosp').value = map['distance_hospital_km'];
+          if(map['distance_city_km']) newRow.querySelector('.field-dist-city').value = map['distance_city_km'];
+          if(map['injuries_est']) newRow.querySelector('.field-injuries').value = map['injuries_est'];
+          if(map['homeless_est']) newRow.querySelector('.field-homeless').value = map['homeless_est'];
+        });
+        // remove template first blank if it's still blank
+        // compute previews automatically
+        computeAllRows();
+        showToast('CSV imported');
+      };
+      reader.readAsText(file);
+    }
+
+    /* ========== Toast ========== */
+    function showToast(msg, type='success'){
+      const el = document.createElement('div');
+      el.className = 'card-glass p-2 mb-2';
+      el.style.width='260px'; el.style.position='fixed'; el.style.right='24px'; el.style.bottom='24px'; el.style.zIndex=9999;
+      el.innerHTML = `<div class="d-flex gap-2 align-items-center"><div style="font-size:20px">${type==='success' ? '✅' : '⚠️'}</div><div><strong style="font-size:13px">${msg}</strong></div></div>`;
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 3000);
+    }
+
+    /* ========== Submit to ML model (integration placeholder) ========== */
+    async function submitToModel(){
+      // Gather payload
+      const payload = gatherPayload();
+      if(!payload.length){ showToast('No rows', 'danger'); return; }
+
+      // Example: POST to your API endpoint
+      // const resp = await fetch('/predict', {
+      //   method: 'POST',
+      //   headers: {'Content-Type':'application/json'},
+      //   body: JSON.stringify({areas: payload})
+      // });
+      // const results = await resp.json();
+      // Then loop results to update UI rows with model outputs.
+
+      // For demo, we'll simulate a delay and then use the local computed previews as "model outputs"
+      showToast('Submitting to model (demo) ...');
+      await new Promise(r=>setTimeout(r, 1000));
+      // pretend server responded with same preview values -> update UI
+      qsa('.area-row').forEach(r=>{
+        // mark as model-predicted (visual)
+        r.style.boxShadow = '0 8px 30px rgba(37,117,252,0.08)';
+      });
+      showToast('Model responded (demo). To integrate, replace submitToModel() code with fetch POST.');
+    }
+
+    /* ======= Attach initial behavior & events ======= */
+    (function init(){
+      // attach events to initial template
+      attachRowEvents(templateRow);
+      updateSummary();
+
+      // buttons
+      qs('#addRowBtn').onclick = ()=> addRow();
+      qs('#duplicateRowBtn').onclick = ()=>{
+        const last = rowsContainer.lastElementChild;
+        addRow(last);
+      };
+      qs('#computeAllBtn').onclick = ()=> computeAllRows();
+      qs('#exportBtn').onclick = ()=> exportCSV();
+      qs('#submitBtn').onclick = ()=> submitToModel();
+
+      // import CSV button
+      qs('#importCsvBtn').onclick = ()=> qs('#csvFileInput').click();
+      qs('#csvFileInput').onchange = (e)=>{
+        const file = e.target.files[0]; if(!file) return;
+        importCSVFile(file);
+        e.target.value = '';
+      };
+
+      // file upload preview
+      qs('#uploadMap').onclick = ()=> qs('#fileInput').click();
+      qs('#fileInput').onchange = (e)=>{
+        const files = Array.from(e.target.files);
+        if(!files.length) return;
+        const preview = qs('#filePreview'); preview.innerHTML = '';
+        files.forEach(f=>{
+          const el = document.createElement('div');
+          el.innerHTML = `<i class="bi bi-file-image"></i> ${f.name} <small class="muted" style="color:#bfeee5">(${Math.round(f.size/1024)} KB)</small>`;
+          preview.appendChild(el);
+        });
+      };
+
+      // initial compute of template
+      computeRow(templateRow);
+      updateSummary();
+    })();
+  </script>
+
+</body>
+</html>

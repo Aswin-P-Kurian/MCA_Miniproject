@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Service Details - Devin Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="static/img/favicon.png" rel="icon">
+  <link href="static/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Questrial:wght@400&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="static/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="static/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="static/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="static/css/main.css" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Devin
+  * Template URL: https://bootstrapmade.com/devin-bootstrap-template/
+  * Updated: Jul 23 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="service-details-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="index.html" class="logo d-flex align-items-center">
+        <!-- Uncomment the line below if you also wish to use an image logo -->
+        <!-- <img src="static/img/logo.webp" alt=""> -->
+        <h1 class="sitename">Devin</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="#hero">Home</a></li>
+          
+
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+      <div class="container">
+        <h1>Service Details</h1>
+        <nav class="breadcrumbs">
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+<style>
+    .slider {
+      width: 100%;
+    }
+    .table td, .table th {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-light p-4">
+
+  <div class="container">
+    <h3 class="mb-4">🌀 Area Data Entry Table</h3>
+
+    <!-- Progress bar -->
+    <div class="mb-3">
+      <label>Data Entry Progress</label>
+      <div class="progress">
+        <div class="progress-bar bg-info" style="width: 60%;">60%</div>
+      </div>
+      <small class="text-muted">7 areas added</small>
+    </div>
+
+    <!-- Data Entry Table -->
+    <table class="table table-bordered table-hover bg-white shadow-sm">
+      <thead class="table-primary">
+        <tr>
+          <th>Area Name *</th>
+          <th>Population Density *</th>
+          <th>Medical Facilities *</th>
+          <th>Road Connectivity</th>
+          <th>Past Disasters *</th>
+          <th>Flood Risk (%) *</th>
+          <th>Vulnerability Score</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="areaTableBody">
+        <tr>
+          <td><input type="text" class="form-control" placeholder="Enter area"></td>
+          <td><input type="number" class="form-control" placeholder="e.g., 2500"></td>
+          <td>
+            <select class="form-select">
+              <option value="None">None</option>
+              <option value="Limited">Limited</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </td>
+          <td><input type="range" min="0" max="10" value="5" class="form-range slider"></td>
+          <td><input type="number" class="form-control" placeholder="e.g., 3"></td>
+          <td><input type="number" class="form-control" placeholder="e.g., 15">%</td>
+          <td><input type="range" min="0" max="10" value="5" class="form-range slider"></td>
+          <td><button class="btn btn-danger btn-sm">🗑</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn btn-primary" onclick="addRow()">+ Add New Area</button>
+  </div>
+
+  <script>
+    function addRow() {
+      const table = document.getElementById("areaTableBody");
+      const row = table.rows[0].cloneNode(true);
+      // Clear input values
+      Array.from(row.querySelectorAll('input')).forEach(input => input.value = '');
+      Array.from(row.querySelectorAll('select')).forEach(select => select.selectedIndex = 0);
+      table.appendChild(row);
+    }
+  </script>
+
+</body>
+   
+
+  </main>
+
+  <footer id="footer" class="footer position-relative light-background">
+
+    <div class="container">
+      <div class="row gy-5">
+
+        <div class="col-lg-4">
+          <div class="footer-content">
+            <a href="index.html" class="logo d-flex align-items-center mb-4">
+              <span class="sitename">Devin</span>
+            </a>
+            <p class="mb-4">Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Donec velit neque auctor sit amet aliquam vel ullamcorper sit amet ligula.</p>
+
+            <div class="newsletter-form">
+              <h5>Stay Updated</h5>
+              <form action="forms/newsletter.php" method="post" class="php-email-form">
+                <div class="input-group">
+                  <input type="email" name="email" class="form-control" placeholder="Enter your email" required="">
+                  <button type="submit" class="btn-subscribe">
+                    <i class="bi bi-send"></i>
+                  </button>
+                </div>
+                <div class="loading">Loading</div>
+                <div class="error-message"></div>
+                <div class="sent-message">Thank you for subscribing!</div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-6">
+          <div class="footer-links">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> About</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Careers</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Press</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Blog</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Contact</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-6">
+          <div class="footer-links">
+            <h4>Solutions</h4>
+            <ul>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Digital Strategy</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Cloud Computing</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Data Analytics</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> AI Solutions</a></li>
+              <li><a href="#"><i class="bi bi-chevron-right"></i> Cybersecurity</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="footer-contact">
+            <h4>Get in Touch</h4>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="bi bi-geo-alt"></i>
+              </div>
+              <div class="contact-info">
+                <p>2847 Maple Avenue<br>Los Angeles, CA 90210<br>United States</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="bi bi-telephone"></i>
+              </div>
+              <div class="contact-info">
+                <p>+1 (555) 987-6543</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="bi bi-envelope"></i>
+              </div>
+              <div class="contact-info">
+                <p>contact@example.com</p>
+              </div>
+            </div>
+
+            <div class="social-links">
+              <a href="#"><i class="bi bi-facebook"></i></a>
+              <a href="#"><i class="bi bi-twitter-x"></i></a>
+              <a href="#"><i class="bi bi-linkedin"></i></a>
+              <a href="#"><i class="bi bi-youtube"></i></a>
+              <a href="#"><i class="bi bi-github"></i></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <div class="copyright">
+              <p>© <span>Copyright</span> <strong class="px-1 sitename">MyWebsite</strong> <span>All Rights Reserved</span></p>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="footer-bottom-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+              <a href="#">Cookie Policy</a>
+            </div>
+            <div class="credits">
+              <!-- All the links in the footer should remain intact. -->
+              <!-- You can delete the links only if you've purchased the pro version. -->
+              <!-- Licensing information: https://bootstrapmade.com/license/ -->
+              <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="static/vendor/php-email-form/validate.js"></script>
+  <script src="static/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="static/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="static/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="static/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="static/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+
+  <!-- Main JS File -->
+  <script src="static/js/main.js"></script>
+
+</body>
+
+</html>

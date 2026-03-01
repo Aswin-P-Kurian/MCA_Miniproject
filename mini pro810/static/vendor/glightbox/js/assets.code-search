@@ -1,0 +1,163 @@
+# Query: assets
+# ContextLines: 1
+
+41 results - 5 files
+
+New Text Document.txt:
+   134              <div class="image-container">
+   135:               <img src="static/img/illustration/illustration-14.webp" alt="Streamlined Workflow" class="img-fluid">
+   136              </div>
+
+   161              <div class="image-container">
+   162:               <img src="static/img/illustration/illustration-6.webp" alt="Performance Analytics" class="img-fluid">
+   163              </div>
+
+   188              <div class="image-container">
+   189:               <img src="static/img/illustration/illustration-7.webp" alt="Security Framework" class="img-fluid">
+   190              </div>
+
+   215              <div class="image-container">
+   216:               <img src="static/img/illustration/illustration-8.webp" alt="Team Environment" class="img-fluid">
+   217              </div>
+
+   252                  <div class="image-container">
+   253:                   <img src="static/img/portfolio/portfolio-3.webp" class="img-fluid" alt="Brand Identity" loading="lazy">
+   254                    <div class="overlay">
+   255                      <div class="overlay-content">
+   256:                       <a href="static/img/portfolio/portfolio-3.webp" class="glightbox zoom-link" title="Brand Identity Project">
+   257                          <i class="bi bi-zoom-in"></i>
+
+   274                  <div class="image-container">
+   275:                   <img src="static/img/portfolio/portfolio-7.webp" class="img-fluid" alt="E-commerce Platform" loading="lazy">
+   276                    <div class="overlay">
+   277                      <div class="overlay-content">
+   278:                       <a href="static/img/portfolio/portfolio-7.webp" class="glightbox zoom-link" title="E-commerce Platform">
+   279                          <i class="bi bi-zoom-in"></i>
+
+   296                  <div class="image-container">
+   297:                   <img src="static/img/portfolio/portfolio-portrait-5.webp" class="img-fluid" alt="Magazine Design" loading="lazy">
+   298                    <div class="overlay">
+   299                      <div class="overlay-content">
+   300:                       <a href="static/img/portfolio/portfolio-portrait-5.webp" class="glightbox zoom-link" title="Magazine Design">
+   301                          <i class="bi bi-zoom-in"></i>
+
+   318                  <div class="image-container">
+   319:                   <img src="static/img/portfolio/portfolio-8.webp" class="img-fluid" alt="Motion Graphics" loading="lazy">
+   320                    <div class="overlay">
+   321                      <div class="overlay-content">
+   322:                       <a href="static/img/portfolio/portfolio-8.webp" class="glightbox zoom-link" title="Motion Graphics">
+   323                          <i class="bi bi-zoom-in"></i>
+
+   340                  <div class="image-container">
+   341:                   <img src="static/img/portfolio/portfolio-9.webp" class="img-fluid" alt="Logo Collection" loading="lazy">
+   342                    <div class="overlay">
+   343                      <div class="overlay-content">
+   344:                       <a href="static/img/portfolio/portfolio-9.webp" class="glightbox zoom-link" title="Logo Collection">
+   345                          <i class="bi bi-zoom-in"></i>
+
+   362                  <div class="image-container">
+   363:                   <img src="static/img/portfolio/portfolio-portrait-8.webp" class="img-fluid" alt="Mobile App Design" loading="lazy">
+   364                    <div class="overlay">
+   365                      <div class="overlay-content">
+   366:                       <a href="static/img/portfolio/portfolio-portrait-8.webp" class="glightbox zoom-link" title="Mobile App Design">
+   367                          <i class="bi bi-zoom-in"></i>
+
+   384                  <div class="image-container">
+   385:                   <img src="static/img/portfolio/portfolio-10.webp" class="img-fluid" alt="Packaging Design" loading="lazy">
+   386                    <div class="overlay">
+   387                      <div class="overlay-content">
+   388:                       <a href="static/img/portfolio/portfolio-10.webp" class="glightbox zoom-link" title="Packaging Design">
+   389                          <i class="bi bi-zoom-in"></i>
+
+   406                  <div class="image-container">
+   407:                   <img src="static/img/portfolio/portfolio-11.webp" class="img-fluid" alt="Brand Animation" loading="lazy">
+   408                    <div class="overlay">
+   409                      <div class="overlay-content">
+   410:                       <a href="static/img/portfolio/portfolio-11.webp" class="glightbox zoom-link" title="Brand Animation">
+   411                          <i class="bi bi-zoom-in"></i>
+
+   595                    <div class="visual-content">
+   596:                     <img src="static/img/features/features-2.webp" alt="" class="img-fluid">
+   597                      <div class="floating-element">
+
+   654                    <div class="visual-content">
+   655:                     <img src="static/img/features/features-4.webp" alt="" class="img-fluid">
+   656                      <div class="floating-element">
+
+   713                    <div class="visual-content">
+   714:                     <img src="static/img/features/features-1.webp" alt="" class="img-fluid">
+   715                      <div class="floating-element">
+
+   772                    <div class="visual-content">
+   773:                     <img src="static/img/features/features-5.webp" alt="" class="img-fluid">
+   774                      <div class="floating-element">
+
+   836                  <div class="testimonial-header">
+   837:                   <img src="static/img/person/person-f-12.webp" alt="Client" class="img-fluid" loading="lazy">
+   838                    <div class="rating">
+
+   862                  <div class="testimonial-header">
+   863:                   <img src="static/img/person/person-m-8.webp" alt="Client" class="img-fluid" loading="lazy">
+   864                    <div class="rating">
+
+   888                  <div class="testimonial-header">
+   889:                   <img src="static/img/person/person-f-6.webp" alt="Client" class="img-fluid" loading="lazy">
+   890                    <div class="rating">
+
+   914                  <div class="testimonial-header">
+   915:                   <img src="static/img/person/person-m-12.webp" alt="Client" class="img-fluid" loading="lazy">
+   916                    <div class="rating">
+
+   940                  <div class="testimonial-header">
+   941:                   <img src="static/img/person/person-f-10.webp" alt="Client" class="img-fluid" loading="lazy">
+   942                    <div class="rating">
+
+  1250                <div class="member-img">
+  1251:                 <img src="static/img/person/person-m-7.webp" class="img-fluid" alt="" loading="lazy">
+  1252                </div>
+
+  1269                <div class="member-img">
+  1270:                 <img src="static/img/person/person-f-8.webp" class="img-fluid" alt="" loading="lazy">
+  1271                </div>
+
+  1288                <div class="member-img">
+  1289:                 <img src="static/img/person/person-m-6.webp" class="img-fluid" alt="" loading="lazy">
+  1290                </div>
+
+  1307                <div class="member-img">
+  1308:                 <img src="static/img/person/person-f-4.webp" class="img-fluid" alt="" loading="lazy">
+  1309                </div>
+
+  1326                <div class="member-img">
+  1327:                 <img src="static/img/person/person-m-12.webp" class="img-fluid" alt="" loading="lazy">
+  1328                </div>
+
+  1345                <div class="member-img">
+  1346:                 <img src="static/img/person/person-f-9.webp" class="img-fluid" alt="" loading="lazy">
+  1347                </div>
+
+forms\contact.php:
+  11  
+  12:   if( file_exists($php_email_form = '../static/vendor/php-email-form/php-email-form.php' )) {
+  13      include( $php_email_form );
+
+forms\newsletter.php:
+  11  
+  12:   if( file_exists($php_email_form = '../static/vendor/php-email-form/php-email-form.php' )) {
+  13      include( $php_email_form );
+
+static\vendor\glightbox\js\glightbox.js:
+  340      if (isNil(url)) {
+  341:       console.error('Inject asset error');
+  342        return;
+
+  938      var videoWrapper = slide.querySelector('.gvideo-wrapper');
+  939:     injectAssets(this.settings.plyr.css, 'Plyr');
+  940      var url = data.href;
+
+  943      slideMedia.style.maxWidth = data.width;
+  944:     injectAssets(this.settings.plyr.js, 'Plyr', function () {
+  945        if (!provider && url.match(/vimeo\.com\/([0-9]*)/)) {
+
+static\vendor\glightbox\js\glightbox.min.js:
+  1: ⟪ 4388 characters skipped ⟫var s;i||(i=100);var l=setInterval((function(){e()&&(clearInterval(l),s&&clearTimeout(s),t())}),i);n&&(s=setTimeout((function(){clearInterval(l)}),n))}}function w(e,t,i){if(O(e))console.error("Inject static error");else if(C(t)&&(i=t,t=!1),k(t)&&t in window)C(i)&&i();else{var n;if(-1!==e.indexOf(".css")){if((n=document.querySelectorAll('link[href="'+e+'"]'))&&n.length>0)return void(C(i)&&i());var s=document.getElementsByTagName("head")[0],l=s.querySelectorAll('link[rel="stylesheet"]'),o=document.createElement("link");return o.rel="stylesheet",o.type="text/css",o.href=e,o.media="all",l?s.insertBefore(o,l[0]):s.appendChild(o),void(C(i)&&i())}if((n=document.querySelectorAll('script[src="'+e+'"]'))&&n.length>0){if(C(i)){if(k(t))return S((function(){return void 0!==window[t]}),(function(){i()})),!1;i()}}else{var r=document.createElement("script");r.type="text/javascript",r.src=e,r.onload=function(){if(C(i)){if(k(t))return S((function(){return void 0!==window[t]}),(function(){i()})),!1;i()}},document.body.appendChild(r)}}}function T(){return"navigator"in window&&window.navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(Android)|(PlayBook)|(BB10)|(BlackBerry)|(Opera Mini)|(IEMobile)|(webO

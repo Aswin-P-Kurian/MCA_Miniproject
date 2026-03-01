@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pre-Disaster Aid Prioritizer — Enhanced Input</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --panel-bg: rgba(255,255,255,0.05);
+      --panel-border: rgba(255,255,255,0.1);
+      --glass-bg: rgba(255,255,255,0.02);
+      --accent-primary: #3b82f6;
+      --accent-secondary: #06b6d4;
+      --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      padding: 20px;
+      background-attachment: fixed;
+    }
+
+    /* Enhanced Top Bar */
+    .top-header {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .app-logo {
+      width: 56px;
+      height: 56px;
+      background: var(--accent-gradient);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: white;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .app-logo::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 18px;
+      padding: 2px;
+      background: var(--accent-gradient);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: xor;
+      opacity: 0.3;
+    }
+
+    .brand-info h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-info .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Enhanced Cards */
+    .enhanced-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg);
+      transition: all 0.3s ease;
+    }
+
+    .enhanced-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    /* Area Row Styling */
+    .area-row {
+      background: var(--glass-bg);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .area-row:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+    }
+
+    .area-row::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent-gradient);
+      border-radius: 16px 16px 0 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .area-row:hover::before {
+      opacity: 1;
+    }
+
+    /* Row Header */
+    .row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .row-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .row-number {
+      background: var(--accent-gradient);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* Enhanced Form Controls */
+    .form-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-control, .form-select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: var(--text-primary);
+      padding: 12px 16px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      outline: none;
+      color: var(--text-primary);
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Enhanced Buttons */
+    .btn-enhanced {
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary-enhanced {
+      background: var(--accent-gradient);
+      color: white;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary-enhanced:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+      color: white;
+    }
+
+    .btn-secondary-enhanced {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-secondary);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-secondary-enhanced:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .btn-danger-enhanced {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-danger-enhanced:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Advanced Section */
+    .advanced-section {
+      background: rgba(59, 130, 246, 0.03);
+      border: 2px dashed rgba(59, 130, 246, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+
+    .advanced-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .advanced-icon {
+      background: var(--accent-gradient);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* Section Dividers */
+    .section-divider {
+      border: none;
+      height: 2px;
+      background: var(--accent-gradient);
+      border-radius: 2px;
+      margin: 24px 0;
+      opacity: 0.3;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Stats Panel */
+    .stats-card {
+      background: var(--glass-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--text-primary);
+    }
+
+    /* Priority Level Styling */
+    .priority-high {
+      border-left: 4px solid var(--danger);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .priority-medium {
+      border-left: 4px solid var(--warning);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .priority-low {
+      border-left: 4px solid var(--success);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+
+    .toast-enhanced {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg);
+      min-width: 300px;
+      margin-bottom: 12px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+      
+      .top-header {
+        padding: 16px;
+      }
+      
+      .brand-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      
+      .enhanced-card {
+        padding: 20px;
+      }
+      
+      .area-row {
+        padding: 16px;
+      }
+    }
+
+    /* Loading States */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid var(--accent-primary);
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Enhanced Top Header -->
+  <header class="top-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="brand-section">
+        <div class="app-logo">PA</div>
+        <div class="brand-info">
+          <h1>Pre-Disaster Aid Prioritizer</h1>
+          <p class="subtitle">Advanced input system for comprehensive disaster response planning</p>
+        </div>
+      </div>
+      
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button class="btn btn-secondary-enhanced btn-enhanced" id="importCsvBtn">
+          <i class="bi bi-file-earmark-arrow-up"></i> Import CSV
+        </button>
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
+        
+        <button class="btn btn-secondary-enhanced btn-enhanced" id="exportCsvBtn">
+          <i class="bi bi-download"></i> Export CSV
+        </button>
+        
+        <div class="vr" style="height:32px;opacity:0.2;margin:0 8px"></div>
+        
+        <select id="themeSelect" class="form-select" style="width:160px;">
+          <option value="dark" selected>🌙 Dark Theme</option>
+          <option value="blue">💙 Ocean Blue</option>
+          <option value="purple">💜 Purple Haze</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <div class="row g-4">
+    <!-- Main Input Section -->
+    <div class="col-lg-8">
+      <div class="enhanced-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h3 style="margin:0;font-weight:600;">Disaster Area Input System</h3>
+            <p class="text-muted mb-0 mt-1">Enter essential information first, then expand with detailed data using "Additional Details"</p>
+          </div>
+          <div class="d-flex gap-2">
+            <button id="addRowBtn" class="btn btn-primary-enhanced btn-enhanced">
+              <i class="bi bi-plus-circle"></i> Add New Area
+            </button>
+            <button id="submitBtn" class="btn btn-secondary-enhanced btn-enhanced">
+              <i class="bi bi-send"></i> Process Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Areas Container -->
+        <div id="rowsContainer">
+          <!-- Template Row -->
+          <div class="area-row fade-in" data-row-id="1">
+            <div class="row-header">
+              <div class="row-title">
+                <div class="row-number">1</div>
+                <span>Disaster Area Information</span>
+              </div>
+              <button class="btn btn-danger-enhanced btn-sm btn-remove-row">
+                <i class="bi bi-trash"></i> Remove
+              </button>
+            </div>
+
+            <!-- Essential Fields -->
+            <div class="row gy-3">
+              <div class="col-md-4">
+                <label class="form-label">
+                  <i class="bi bi-geo-alt text-primary"></i> Area Name
+                </label>
+                <input type="text" class="form-control field-area-name" placeholder="e.g., Downtown District">
+              </div>
+              
+              <div class="col-md-4">
+                <label class="form-label">
+                  <i class="bi bi-people text-primary"></i> Total Population
+                </label>
+                <input type="number" class="form-control field-population" placeholder="50000">
+              </div>
+              
+              <div class="col-md-4">
+                <label class="form-label">
+                  <i class="bi bi-grid text-primary"></i> Population Density (per km²)
+                </label>
+                <input type="number" class="form-control field-popdensity" placeholder="1200">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">
+                  <i class="bi bi-exclamation-triangle text-warning"></i> Disaster Type
+                </label>
+                <select class="form-select field-disaster">
+                  <option value="">Select disaster type</option>
+                  <option value="Flood">🌊 Flood</option>
+                  <option value="Earthquake">🏗️ Earthquake</option>
+                  <option value="Fire">🔥 Fire</option>
+                  <option value="Landslide">⛰️ Landslide</option>
+                  <option value="Cyclone">🌀 Cyclone</option>
+                  <option value="Drought">🏜️ Drought</option>
+                  <option value="Tsunami">🌊 Tsunami</option>
+                </select>
+              </div>
+              
+              <div class="col-md-4">
+                <label class="form-label">
+                  <i class="bi bi-speedometer2 text-danger"></i> Severity Level (1-5)
+                </label>
+                <select class="form-select field-severity">
+                  <option value="1">1 - Minimal Impact</option>
+                  <option value="2">2 - Minor Impact</option>
+                  <option value="3" selected>3 - Moderate Impact</option>
+                  <option value="4">4 - Major Impact</option>
+                  <option value="5">5 - Catastrophic</option>
+                </select>
+              </div>
+              
+              <div class="col-md-4">
+                <label class="form-label">
+                  <i class="bi bi-signpost text-info"></i> Road Access Quality (1-5)
+                </label>
+                <select class="form-select field-road">
+                  <option value="1">1 - Completely Blocked</option>
+                  <option value="2">2 - Severely Limited</option>
+                  <option value="3" selected>3 - Partially Accessible</option>
+                  <option value="4">4 - Mostly Accessible</option>
+                  <option value="5">5 - Fully Accessible</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-bandaid text-danger"></i> Estimated Injuries
+                </label>
+                <input type="number" class="form-control field-injuries" placeholder="300">
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-house text-warning"></i> Displaced/Homeless People
+                </label>
+                <input type="number" class="form-control field-homeless" placeholder="2000">
+              </div>
+
+              <!-- Toggle Button -->
+              <div class="col-12 text-end mt-3">
+                <button class="btn btn-secondary-enhanced btn-enhanced btn-toggle-adv">
+                  <i class="bi bi-plus-circle"></i> Show Additional Details
+                </button>
+              </div>
+
+              <!-- Advanced Section -->
+              <div class="col-12 collapse advanced">
+                <div class="advanced-section">
+                  <div class="advanced-header">
+                    <div class="advanced-icon">
+                      <i class="bi bi-gear"></i>
+                    </div>
+                    <h4 class="mb-0">Detailed Assessment Data</h4>
+                  </div>
+
+                  <div class="row gy-3">
+                    <!-- Demographics Section -->
+                    <div class="col-12">
+                      <h5 class="section-title">
+                        <i class="bi bi-people"></i> Demographics & Population
+                      </h5>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Elderly Population (65+) %</label>
+                      <input type="number" step="0.1" class="form-control field-elderly" placeholder="15.2">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Children (0-12) %</label>
+                      <input type="number" step="0.1" class="form-control field-children" placeholder="18.5">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Area Classification</label>
+                      <select class="form-select field-urban-rural">
+                        <option value="">Select classification</option>
+                        <option value="Urban">🏙️ Urban</option>
+                        <option value="Suburban">🏘️ Suburban</option>
+                        <option value="Rural">🌾 Rural</option>
+                        <option value="Remote">🏔️ Remote</option>
+                      </select>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Infrastructure Section -->
+                    <div class="col-12">
+                      <h5 class="section-title">
+                        <i class="bi bi-building"></i> Infrastructure & Access
+                      </h5>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Distance to Hospital (km)</label>
+                      <input type="number" step="0.1" class="form-control field-dist-hosp" placeholder="25.0">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Distance to Major City (km)</label>
+                      <input type="number" step="0.1" class="form-control field-dist-city" placeholder="100.0">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Infrastructure Damage (%)</label>
+                      <input type="number" step="0.1" class="form-control field-infra" placeholder="50.0">
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label">Internet Access</label>
+                      <select class="form-select field-internet">
+                        <option value="Yes">✅ Available</option>
+                        <option value="No">❌ Not Available</option>
+                        <option value="Limited">⚠️ Limited</option>
+                      </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Electricity Status</label>
+                      <select class="form-select field-electric">
+                        <option value="Yes">✅ Available</option>
+                        <option value="No">❌ Not Available</option>
+                        <option value="Partial">⚠️ Partial</option>
+                      </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Medical Facility Score (0-5)</label>
+                      <select class="form-select field-medical-facility">
+                        <option value="0">0 - No Facilities</option>
+                        <option value="1">1 - Basic Clinic</option>
+                        <option value="2">2 - Health Center</option>
+                        <option value="3">3 - District Hospital</option>
+                        <option value="4">4 - Regional Hospital</option>
+                        <option value="5">5 - Major Medical Center</option>
+                      </select>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Disaster Impact Section -->
+                    <div class="col-12">
+                      <h5 class="section-title">
+                        <i class="bi bi-exclamation-triangle"></i> Disaster Impact Assessment
+                      </h5>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Affected Area (sq. km)</label>
+                      <input type="number" step="0.1" class="form-control field-affected-area" placeholder="45.5">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Time Since Disaster (hours)</label>
+                      <input type="number" class="form-control field-time-since" placeholder="72">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Past Disasters Frequency (per year)</label>
+                      <input type="number" step="0.1" class="form-control field-past-frequency" placeholder="2.5">
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label">Weather Conditions</label>
+                      <select class="form-select field-weather">
+                        <option value="">Select weather</option>
+                        <option value="Clear">☀️ Clear</option>
+                        <option value="Cloudy">☁️ Cloudy</option>
+                        <option value="Rainy">🌧️ Rainy</option>
+                        <option value="Stormy">⛈️ Stormy</option>
+                        <option value="Extreme">🌪️ Extreme Weather</option>
+                      </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <label class="form-label">Priority Level</label>
+                      <select class="form-select field-priority">
+                        <option value="">Select priority</option>
+                        <option value="Low">🟢 Low Priority</option>
+                        <option value="Medium">🟡 Medium Priority</option>
+                        <option value="High">🟠 High Priority</option>
+                        <option value="Critical">🔴 Critical Priority</option>
+                      </select>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Resources & Requirements Section -->
+                    <div class="col-12">
+                      <h5 class="section-title">
+                        <i class="bi bi-box-seam"></i> Resources & Requirements
+                      </h5>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Medical Supplies Stock (units)</label>
+                      <input type="number" class="form-control field-medstock" placeholder="200">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Food Supplies Stock (units)</label>
+                      <input type="number" class="form-control field-foodstock" placeholder="500">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Available Volunteers</label>
+                      <input type="number" class="form-control field-volunteers" placeholder="120">
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label">Water Demand (litres/day)</label>
+                      <input type="number" class="form-control field-water-demand" placeholder="50000">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Food Requirement (kg/day)</label>
+                      <input type="number" class="form-control field-food-requirement" placeholder="2000">
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <label class="form-label">Medical Supply Requirements</label>
+                      <select class="form-select field-med-requirements">
+                        <option value="">Select requirement level</option>
+                        <option value="Minimal">Minimal</option>
+                        <option value="Standard">Standard</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label">Food Supply Requirements</label>
+                      <select class="form-select field-food-supply-req">
+                        <option value="">Select requirement level</option>
+                        <option value="Minimal">Minimal</option>
+                        <option value="Standard">Standard</option>
+                        <option value="High">High</option>
+                        <option value="Emergency">Emergency</option>
+                      </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <label class="form-label">Vulnerable Groups Present</label>
+                      <select class="form-select field-vulnerable">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes - Special attention needed</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Right Panel -->
+    <div class="col-lg-4">
+      <div class="enhanced-card">
+        <!-- Statistics -->
+        <div class="stats-card">
+          <h5 class="mb-3" style="font-weight:600;">
+            <i class="bi bi-graph-up text-primary"></i> System Statistics
+          </h5>
+          
+          <div class="stat-item">
+            <span class="stat-label">Areas Registered</span>
+            <span class="stat-value text-primary" id="statAreaCount">1</span>
+          </div>
+          
+          <div class="stat-item">
+            <span class="stat-label">Detailed Assessments</span>
+            <span class="stat-value text-info" id="statAdvCount">0</span>
+          </div>
+          
+          <div class="stat-item">
+            <span class="stat-label">Data Completeness</span>
+            <span class="stat-value text-success" id="statCompleteness">65%</span>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="stats-card">
+          <h5 class="mb-3" style="font-weight:600;">
+            <i class="bi bi-lightning text-warning"></i> Quick Actions
+          </h5>
+          
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary-enhanced btn-enhanced" onclick="submitForPrediction()">
+              <i class="bi bi-cpu"></i> Run ML Analysis
+            </button>
+            
+            <button class="btn btn-secondary-enhanced btn-enhanced" onclick="validateData()">
+              <i class="bi bi-check-circle"></i> Validate Data
+            </button>
+            
+            <button class="btn btn-secondary-enhanced btn-enhanced" onclick="generateReport()">
+              <i class="bi bi-file-text"></i> Generate Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Guidelines -->
+        <div class="stats-card">
+          <h5 class="mb-3" style="font-weight:600;">
+            <i class="bi bi-info-circle text-info"></i> Data Guidelines
+          </h5>
+          
+          <div class="small text-muted">
+            <div class="mb-2">
+              <strong>🎯 Essential Fields:</strong> Complete basic information first
+            </div>
+            <div class="mb-2">
+              <strong>📊 Additional Details:</strong> Expand for comprehensive analysis
+            </div>
+            <div class="mb-2">
+              <strong>💾 Data Backup:</strong> Export CSV regularly
+            </div>
+            <div>
+              <strong>🔄 CSV Import:</strong> Use standard column headers for import
+            </div>
+          </div>
+        </div>
+
+        <!-- CSV Info -->
+        <div class="stats-card">
+          <h5 class="mb-3" style="font-weight:600;">
+            <i class="bi bi-file-spreadsheet text-success"></i> CSV Import Format
+          </h5>
+          
+          <div class="small text-muted">
+            <code style="background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;display:block;word-break:break-all;">
+              area_name, total_population, population_density, disaster_type, severity, road_access, estimated_injuries, displaced
+            </code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Utility Functions
+    const $ = (selector, parent = document) => parent.querySelector(selector);
+    const $$ = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
+    const toNumber = val => { const n = parseFloat(val); return Number.isFinite(n) ? n : 0; };
+
+    // Global Variables
+    const rowsContainer = $('#rowsContainer');
+    const templateRow = $('.area-row', rowsContainer);
+    let rowCounter = 1;
+
+    // Row Management Functions
+    function attachRowEvents(row) {
+      // Remove row event
+      $('.btn-remove-row', row).addEventListener('click', () => {
+        if (rowsContainer.children.length > 1) {
+          row.classList.add('fade-out');
+          setTimeout(() => {
+            row.remove();
+            updateStatistics();
+            showToast('Area removed successfully', 'success');
+          }, 300);
+        } else {
+          clearRowData(row);
+          showToast('Row data cleared', 'info');
+        }
+      });
+
+      // Toggle advanced section
+      const toggleBtn = $('.btn-toggle-adv', row);
+      const advancedSection = $('.advanced', row);
+      
+      advancedSection.addEventListener('shown.bs.collapse', () => {
+        toggleBtn.innerHTML = '<i class="bi bi-dash-circle"></i> Hide Additional Details';
+        updateStatistics();
+      });
+      
+      advancedSection.addEventListener('hidden.bs.collapse', () => {
+        toggleBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Show Additional Details';
+        updateStatistics();
+      });
+      
+      toggleBtn.addEventListener('click', () => {
+        new bootstrap.Collapse(advancedSection, { toggle: true });
+      });
+
+      // Update stats on input change
+      $$('input, select', row).forEach(input => {
+        input.addEventListener('change', updateStatistics);
+        input.addEventListener('input', updateStatistics);
+      });
+
+      // Priority level styling
+      const prioritySelect = $('.field-priority', row);
+      if (prioritySelect) {
+        prioritySelect.addEventListener('change', (e) => {
+          row.classList.remove('priority-high', 'priority-medium', 'priority-low');
+          const value = e.target.value.toLowerCase();
+          if (value === 'critical' || value === 'high') {
+            row.classList.add('priority-high');
+          } else if (value === 'medium') {
+            row.classList.add('priority-medium');
+          } else if (value === 'low') {
+            row.classList.add('priority-low');
+          }
+        });
+      }
+    }
+
+    function clearRowData(row) {
+      $$('input', row).forEach(input => input.value = '');
+      $$('select', row).forEach(select => select.selectedIndex = 0);
+    }
+
+    function cloneRow(sourceRow) {
+      const clone = sourceRow.cloneNode(true);
+      rowCounter++;
+      
+      clone.dataset.rowId = rowCounter;
+      $('.row-number', clone).textContent = rowCounter;
+      
+      // Clear input values
+      clearRowData(clone);
+      
+      // Reset advanced section
+      const advSection = $('.advanced', clone);
+      advSection.classList.remove('show');
+      $('.btn-toggle-adv', clone).innerHTML = '<i class="bi bi-plus-circle"></i> Show Additional Details';
+      
+      return clone;
+    }
+
+    function addNewRow() {
+      const newRow = cloneRow(templateRow);
+      newRow.classList.add('fade-in');
+      rowsContainer.appendChild(newRow);
+      attachRowEvents(newRow);
+      updateStatistics();
+      showToast('New area added successfully', 'success');
+      
+      // Scroll to new row
+      newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Statistics Update
+    function updateStatistics() {
+      const rows = $$('.area-row', rowsContainer);
+      const advancedCount = rows.filter(row => 
+        $('.advanced', row).classList.contains('show')
+      ).length;
+      
+      $('#statAreaCount').textContent = rows.length;
+      $('#statAdvCount').textContent = advancedCount;
+      
+      // Calculate data completeness
+      let totalFields = 0;
+      let filledFields = 0;
+      
+      rows.forEach(row => {
+        const inputs = $$('input, select', row);
+        totalFields += inputs.length;
+        filledFields += inputs.filter(input => 
+          input.value && input.value.trim() !== ''
+        ).length;
+      });
+      
+      const completeness = totalFields > 0 ? Math.round((filledFields / totalFields) * 100) : 0;
+      $('#statCompleteness').textContent = completeness + '%';
+    }
+
+    // Data Export/Import
+    function exportCSV() {
+      const rows = $$('.area-row', rowsContainer);
+      if (!rows.length) {
+        showToast('No data to export', 'warning');
+        return;
+      }
+
+      const columns = [
+        'area_name', 'total_population', 'population_density', 'elderly_percent', 'children_percent',
+        'urban_rural', 'disaster_type', 'severity', 'road_access', 'estimated_injuries', 'displaced',
+        'dist_hospital_km', 'dist_city_km', 'infrastructure_damage_pct', 'affected_area_sq_km',
+        'time_since_disaster', 'medical_facility_score', 'internet_access', 'electricity_status',
+        'weather_conditions', 'priority_level', 'medical_stock', 'food_stock', 'volunteers',
+        'water_demand', 'food_requirement', 'medical_requirements', 'food_supply_requirements',
+        'vulnerable_groups', 'past_disasters_frequency'
+      ];
+
+      const csvData = [];
+      csvData.push(columns.join(','));
+
+      rows.forEach(row => {
+        const rowData = columns.map(col => {
+          const field = $(`.field-${col.replace(/_/g, '-')}`, row);
+          const value = field ? field.value || '' : '';
+          return `"${value.replace(/"/g, '""')}"`;
+        });
+        csvData.push(rowData.join(','));
+      });
+
+      const csvContent = csvData.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `disaster-aid-data-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      showToast('Data exported successfully', 'success');
+    }
+
+    // Enhanced Toast Function
+    function showToast(message, type = 'info', duration = 4000) {
+      const toastContainer = $('#toastContainer');
+      const toast = document.createElement('div');
+      
+      const icons = {
+        success: '✅',
+        warning: '⚠️',
+        error: '❌',
+        info: 'ℹ️'
+      };
+      
+      const colors = {
+        success: 'var(--success)',
+        warning: 'var(--warning)',
+        error: 'var(--danger)',
+        info: 'var(--accent-primary)'
+      };
+
+      toast.className = 'toast-enhanced fade-in';
+      toast.innerHTML = `
+        <div style="padding: 16px; display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 18px;">${icons[type]}</div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: ${colors[type]}; margin-bottom: 2px;">${type.toUpperCase()}</div>
+            <div style="color: var(--text-secondary); font-size: 14px;">${message}</div>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" 
+                  style="background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer;">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      `;
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';

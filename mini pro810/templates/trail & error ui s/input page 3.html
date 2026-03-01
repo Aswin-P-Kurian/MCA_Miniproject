@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pre-Disaster Aid Prioritizer — Input</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-dark: #071428;
+      --panel: rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.06);
+      --accent: linear-gradient(90deg,#4f46e5,#06b6d4);
+      --accent-solid: #4f46e5;
+    }
+    html,body{height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    body{
+      margin:0;padding:28px;
+      background: linear-gradient(180deg, #021024 0%, #071428 60%);
+      color:#eaf8f6;
+    }
+
+    /* Top bar */
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo {
+      width:50px;height:50px;border-radius:12px;display:grid;place-items:center;
+      background:var(--accent); color:white; font-weight:800; font-size:18px; box-shadow:0 8px 30px rgba(0,0,0,0.6);
+    }
+    .app-title { margin:0; font-size:18px; font-weight:700; color:#fff; }
+    .app-sub { margin:0; font-size:12px; color:#bfeee5; opacity:0.9; }
+
+    /* Page card */
+    .card-panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border:1px solid var(--glass-border); border-radius:12px; padding:18px; box-shadow: 0 10px 40px rgba(2,6,23,0.65);
+    }
+
+    /* Row card */
+    .area-row {
+      background: rgba(255,255,255,0.02); border-radius:10px; padding:14px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.03);
+    }
+    label.form-label{ color:#cdeee5; font-weight:600; font-size:0.85rem; }
+    input.form-control, select.form-select, textarea.form-control {
+      background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); color:#ebfbf7;
+    }
+    input::placeholder{ color: rgba(255,255,255,0.28); }
+
+    /* Buttons */
+    .btn-primary-grad{
+      background: linear-gradient(90deg,#4f46e5,#06b6d4);
+      border:none;color:#fff;font-weight:700;
+      box-shadow:0 8px 20px rgba(79,70,229,0.12);
+    }
+    .btn-ghost{
+      background: transparent; border:1px solid rgba(255,255,255,0.05); color:#eaf8f6;
+    }
+
+    /* Right panel */
+    .right-panel .stat { background: rgba(255,255,255,0.02); padding:14px; border-radius:10px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.03); }
+    .stat .num { font-weight:800; font-size:24px; color:#fff; }
+
+    /* Helpers */
+    .small-muted { color:#bfeee5; opacity:0.9; font-size:13px; }
+    .muted { color:#bfeee5; opacity:0.75; font-size:13px; }
+    .compact { gap:8px; }
+    .collapse-adv { background: rgba(255,255,255,0.01); border-radius:8px; padding:12px; margin-top:10px; border:1px dashed rgba(255,255,255,0.03); }
+
+    /* Themes toggle */
+    .theme-dot{ width:14px;height:14px;border-radius:4px; display:inline-block; margin-right:6px; border:1px solid rgba(255,255,255,0.06); }
+
+    /* Responsiveness */
+    @media (max-width: 900px){
+      .topbar{flex-direction:column;align-items:flex-start;gap:10px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">PA</div>
+      <div>
+        <h1 class="app-title">Pre-Disaster Aid Prioritizer — Input</h1>
+        <div class="app-sub">Enter area-level data. Add Details → open advanced fields. Export / Submit when ready.</div>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-ghost" id="importCsvBtn"><i class="bi bi-file-earmark-arrow-up me-1"></i> Import CSV</button>
+      <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
+      <button class="btn btn-ghost" id="exportCsvBtn"><i class="bi bi-download me-1"></i> Export CSV</button>
+      <div class="vr" style="height:28px;opacity:0.06"></div>
+      <div class="d-flex align-items-center gap-2">
+        <small class="muted">Theme</small>
+        <select id="themeSelect" class="form-select form-select-sm" style="width:150px;">
+          <option value="dark" selected>Dark (Professional)</option>
+          <option value="light">Light (Clean)</option>
+          <option value="teal">Teal (Modern)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="row g-4">
+    <!-- INPUTS COLUMN -->
+    <div class="col-lg-8">
+      <div class="card-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 style="margin:0">Areas Input</h5>
+            <div class="small-muted">Essential fields are visible. Click "Add Details" inside a row to view optional inputs.</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button id="addRowBtn" class="btn btn-primary-grad btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Area</button>
+            <button id="duplicateRowBtn" class="btn btn-ghost btn-sm"><i class="bi bi-files me-1"></i> Duplicate Last</button>
+            <button id="submitBtn" class="btn btn-ghost btn-sm"><i class="bi bi-send me-1"></i> Submit</button>
+          </div>
+        </div>
+
+        <!-- ROWS CONTAINER -->
+        <div id="rowsContainer">
+          <!-- TEMPLATE ROW -->
+          <div class="area-row" data-row-id="1">
+            <div class="row gy-2">
+              <!-- header -->
+              <div class="col-12 d-flex justify-content-between align-items-center mb-1">
+                <strong class="row-title">Area 1</strong>
+                <div class="small-muted">Row tools:
+                  <button class="btn btn-sm btn-ghost btn-remove-row">Remove</button>
+                </div>
+              </div>
+
+              <!-- Essential fields (compact layout) -->
+              <div class="col-md-4">
+                <label class="form-label">Area Name</label>
+                <input type="text" class="form-control field-area-name" placeholder="District A">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Population (total)</label>
+                <input type="number" class="form-control field-population" placeholder="50000">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Pop. Density (per km²)</label>
+                <input type="number" class="form-control field-popdensity" placeholder="1200">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Disaster Type</label>
+                <select class="form-select field-disaster">
+                  <option>Flood</option><option>Earthquake</option><option>Fire</option><option>Landslide</option><option>Cyclone</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Severity (1–5)</label>
+                <select class="form-select field-severity">
+                  <option value="1">1 - Low</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5 - Critical</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Road Access (1–5)</label>
+                <select class="form-select field-road">
+                  <option value="1">1 - Poor</option><option value="2">2</option><option value="3" selected>3 - Moderate</option><option value="4">4</option><option value="5">5 - Excellent</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Estimated Injuries</label>
+                <input type="number" class="form-control field-injuries" placeholder="300">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Displaced / Homeless</label>
+                <input type="number" class="form-control field-homeless" placeholder="2000">
+              </div>
+
+              <!-- toggle advanced -->
+              <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button class="btn btn-ghost btn-sm btn-toggle-adv"><i class="bi bi-plus-circle me-1"></i> Add Details</button>
+                <button class="btn btn-ghost btn-sm btn-duplicate-row"><i class="bi bi-files me-1"></i> Duplicate</button>
+              </div>
+
+              <!-- Advanced collapsible (hidden by default) -->
+              <div class="col-12 collapse advanced collapse-adv">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label class="form-label">Dist. to Hospital (km)</label>
+                    <input type="number" step="0.1" class="form-control field-dist-hosp" placeholder="25">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Dist. to City (km)</label>
+                    <input type="number" step="0.1" class="form-control field-dist-city" placeholder="100">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Infrastructure Damage (%)</label>
+                    <input type="number" step="0.1" class="form-control field-infra" placeholder="50">
+                  </div>
+
+                  <div class="col-md-4 mt-2">
+                    <label class="form-label">Medical Stock (units)</label>
+                    <input type="number" class="form-control field-medstock" placeholder="200">
+                  </div>
+                  <div class="col-md-4 mt-2">
+                    <label class="form-label">Food Stock (units)</label>
+                    <input type="number" class="form-control field-foodstock" placeholder="500">
+                  </div>
+                  <div class="col-md-4 mt-2">
+                    <label class="form-label">Volunteers (count)</label>
+                    <input type="number" class="form-control field-volunteers" placeholder="120">
+                  </div>
+
+                  <div class="col-md-4 mt-2">
+                    <label class="form-label">Internet Available</label>
+                    <select class="form-select field-internet"><option>Yes</option><option>No</option></select>
+                  </div>
+                  <div class="col-md-4 mt-2">
+                    <label class="form-label">Electricity Available</label>
+                    <select class="form-select field-electric"><option>Yes</option><option>No</option></select>
+                  </div>
+                  <div class="col-md-4 mt-2">
+                    <label class="form-label">Presence of Vulnerable Groups</label>
+                    <select class="form-select field-vulnerable"><option>No</option><option>Yes</option></select>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <!-- end template -->
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="col-lg-4">
+      <div class="card-panel right-panel">
+        <div class="stat mb-2">
+          <div class="d-flex justify-content-between">
+            <div>
+              <div class="muted">Areas added</div>
+              <div class="num" id="statAreaCount">1</div>
+            </div>
+            <div>
+              <div class="muted">Rows with extra details</div>
+              <div class="num" id="statAdvCount">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat mb-2">
+          <div class="muted">Quick tips</div>
+          <ul class="small-muted" style="margin:8px 0 0 0;padding-left:16px">
+            <li>Fill essential fields only to start.</li>
+            <li>Use Add Details for distances, stock & operational info.</li>
+            <li>Export CSV to create a backup or send to others.</li>
+          </ul>
+        </div>
+
+        <div class="stat">
+          <div class="muted">CSV import requirements</div>
+          <div class="small-muted" style="margin-top:8px">Recommended column names: <code>area_name,total_population,population_density,disaster_type,severity,road_access,estimated_injuries,displaced</code></div>
+        </div>
+
+        <div class="mt-3 d-grid">
+          <button id="computeAllBtn" class="btn btn-primary-grad">Validate & Prepare (local)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST / tiny notification area -->
+  <div id="toastArea" style="position:fixed;right:18px;bottom:18px;z-index:9999"></div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    /* -----------------------
+       Helper utilities
+       ----------------------- */
+    const qs = (s, el=document) => el.querySelector(s);
+    const qsa = (s, el=document) => Array.from(el.querySelectorAll(s));
+    const toNum = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+
+    /* -----------------------
+       Row management
+       ----------------------- */
+    const rowsContainer = document.getElementById('rowsContainer');
+    const templateRow = rowsContainer.querySelector('.area-row');
+    let rowCount = 1;
+
+    // attach events to a row element
+    function attachRowEvents(row){
+      // Remove row
+      row.querySelector('.btn-remove-row').addEventListener('click', () => {
+        if (rowsContainer.children.length > 1) {
+          row.remove();
+          updateStats();
+        } else {
+          // clear inputs if only one row
+          qsa('input,select', row).forEach(i => { if(i.tagName!=='BUTTON') i.value = ''; });
+          updateStats();
+          showToast('Cleared the only row.');
+        }
+      });
+
+      // Toggle advanced section
+      const advBtn = row.querySelector('.btn-toggle-adv');
+      if(advBtn){
+        advBtn.addEventListener('click', () => {
+          const adv = row.querySelector('.advanced');
+          const collapse = new bootstrap.Collapse(adv, { toggle: true });
+          // change label
+          if (adv.classList.contains('show')) {
+            adv.classList.remove('show');
+            advBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add Details';
+            (adv).classList.remove('show');
+            // collapse handled by bootstrap
+          } else {
+            adv.classList.add('show');
+            advBtn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Hide Details';
+          }
+          updateStats();
+        });
+      }
+
+      // Duplicate row (within)
+      row.querySelector('.btn-duplicate-row').addEventListener('click', () => {
+        const copy = cloneRow(row);
+        rowsContainer.appendChild(copy);
+        attachRowEvents(copy);
+        updateStats();
+      });
+
+      // Update stats on change
+      qsa('input,select', row).forEach(el => el.addEventListener('change', updateStats));
+    }
+
+    // clone a row (and clear IDs)
+    function cloneRow(sourceRow){
+      const clone = sourceRow.cloneNode(true);
+      rowCount++;
+      clone.dataset.rowId = rowCount;
+      clone.querySelector('.row-title').textContent = 'Area ' + rowCount;
+      // clear non-advanced basic inputs to avoid duplicate content in the simplest flow
+      qsa('input,select', clone).forEach(el=>{
+        // keep defaults for selects, but clear typed inputs
+        if (el.tagName === 'INPUT') el.value = '';
+        else el.selectedIndex = 0;
+      });
+      return clone;
+    }
+
+    // add new blank row at end
+    function addNewRow(){
+      const newRow = cloneRow(templateRow);
+      rowsContainer.appendChild(newRow);
+      attachRowEvents(newRow);
+      updateStats();
+      showToast('Added a new empty area row');
+      return newRow;
+    }
+
+    // duplicate last row
+    function duplicateLast(){
+      const last = rowsContainer.lastElementChild;
+      const copy = last.cloneNode(true);
+      rowCount++;
+      copy.dataset.rowId = rowCount;
+      copy.querySelector('.row-title').textContent = 'Area ' + rowCount;
+      rowsContainer.appendChild(copy);
+      attachRowEvents(copy);
+      updateStats();
+      showToast('Duplicated last row');
+    }
+
+    // initial attach to template
+    attachRowEvents(templateRow);
+
+    // hook buttons
+    document.getElementById('addRowBtn').addEventListener('click', addNewRow);
+    document.getElementById('duplicateRowBtn').addEventListener('click', duplicateLast);
+
+    /* -----------------------
+       Summary & Stats
+       ----------------------- */
+    function updateStats(){
+      const rows = qsa('.area-row', rowsContainer);
+      document.getElementById('statAreaCount').textContent = rows.length;
+
+      let advCount = 0;
+      rows.forEach(r => {
+        if (r.querySelector('.advanced') && r.querySelector('.advanced').classList.contains('show')) advCount++;
+      });
+      document.getElementById('statAdvCount').textContent = advCount;
+    }
+
+    /* -----------------------
+       CSV export / import
+       - export includes all standard fields and advanced fields (column list below)
+       ----------------------- */
+    function exportCSV(){
+      const rows = qsa('.area-row', rowsContainer);
+      if(!rows.length) { showToast('No rows to export', 'warning'); return; }
+      // columns
+      const columns = [
+        'area_name','total_population','population_density','disaster_type','severity','road_access',
+        'estimated_injuries','displaced',
+        // advanced
+        'dist_hospital_km','dist_city_km','infrastructure_damage_pct','medical_stock','food_stock','volunteers',
+        'internet','electricity','vulnerable_groups'
+      ];
+      const lines = [];
+      lines.push(columns.join(','));
+      rows.forEach(r=>{
+        const obj = {
+          area_name: (r.querySelector('.field-area-name')?.value || ''),
+          total_population: (r.querySelector('.field-population')?.value || ''),
+          population_density: (r.querySelector('.field-popdensity')?.value || ''),
+          disaster_type: (r.querySelector('.field-disaster')?.value || ''),
+          severity: (r.querySelector('.field-severity')?.value || ''),
+          road_access: (r.querySelector('.field-road')?.value || ''),
+          estimated_injuries: (r.querySelector('.field-injuries')?.value || ''),
+          displaced: (r.querySelector('.field-homeless')?.value || ''),
+          dist_hospital_km: (r.querySelector('.field-dist-hosp')?.value || ''),
+          dist_city_km: (r.querySelector('.field-dist-city')?.value || ''),
+          infrastructure_damage_pct: (r.querySelector('.field-infra')?.value || ''),
+          medical_stock: (r.querySelector('.field-medstock')?.value || ''),
+          food_stock: (r.querySelector('.field-foodstock')?.value || ''),
+          volunteers: (r.querySelector('.field-volunteers')?.value || ''),
+          internet: (r.querySelector('.field-internet')?.value || ''),
+          electricity: (r.querySelector('.field-electric')?.value || ''),
+          vulnerable_groups: (r.querySelector('.field-vulnerable')?.value || '')
+        };
+        const row = columns.map(c => `"${String(obj[c] ?? '').replace(/"/g,'""')}"`).join(',');
+        lines.push(row);
+      });
+      const csv = lines.join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'pre_disaster_input.csv'; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exported CSV');
+    }
+    document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+
+    // import CSV (basic parser: assumes first line header matches column names)
+    document.getElementById('importCsvBtn').addEventListener('click', ()=> document.getElementById('csvFileInput').click());
+    document.getElementById('csvFileInput').addEventListener('change', (ev)=>{
+      const f = ev.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        const rows = text.split(/\r?\n/).filter(Boolean);
+        if(rows.length < 2){ showToast('CSV has no data', 'warning'); return; }
+        const header = rows.shift().split(',').map(h => h.trim().replace(/^"|"$/g,''));
+        rows.forEach((ln, idx) => {
+          const cols = ln.split(',').map(c => c.trim().replace(/^"|"$/g,''));
+          // create a new row and map known columns
+          const newRow = addNewBlankRowFromCSV();
+          const map = {};
+          header.forEach((h,i) => map[h] = cols[i] ?? '');
+          // simple mappings (if present)
+          if(map['area_name']) newRow.querySelector('.field-area-name').value = map['area_name'];
+          if(map['total_population']) newRow.querySelector('.field-population').value = map['total_population'];
+          if(map['population_density']) newRow.querySelector('.field-popdensity').value = map['population_density'];
+          if(map['disaster_type']) newRow.querySelector('.field-disaster').value = map['disaster_type'];
+          if(map['severity']) newRow.querySelector('.field-severity').value = map['severity'];
+          if(map['road_access']) newRow.querySelector('.field-road').value = map['road_access'];
+          if(map['estimated_injuries']) newRow.querySelector('.field-injuries').value = map['estimated_injuries'];
+          if(map['displaced']) newRow.querySelector('.field-homeless').value = map['displaced'];
+          // advanced
+          if(map['dist_hospital_km']) newRow.querySelector('.field-dist-hosp').value = map['dist_hospital_km'];
+          if(map['dist_city_km']) newRow.querySelector('.field-dist-city').value = map['dist_city_km'];
+          if(map['infrastructure_damage_pct']) newRow.querySelector('.field-infra').value = map['infrastructure_damage_pct'];
+          if(map['medical_stock']) newRow.querySelector('.field-medstock').value = map['medical_stock'];
+          if(map['food_stock']) newRow.querySelector('.field-foodstock').value = map['food_stock'];
+          if(map['volunteers']) newRow.querySelector('.field-volunteers').value = map['volunteers'];
+        });
+        showToast('CSV imported (basic mapping)');
+        ev.target.value = '';
+      };
+      reader.readAsText(f);
+    });
+
+    function addNewBlankRowFromCSV(){
+      const newRow = cloneTemplateRow();
+      rowsContainer.appendChild(newRow);
+      attachRowEvents(newRow);
+      updateStats();
+      return newRow;
+    }
+
+    function cloneTemplateRow(){
+      const clone = templateRow.cloneNode(true);
+      rowCount++;
+      clone.dataset.rowId = rowCount;
+      clone.querySelector('.row-title').textContent = 'Area ' + rowCount;
+      // reset values
+      qsa('input,select', clone).forEach(el => {
+        if(el.tagName === 'INPUT') el.value = '';
+        else el.selectedIndex = 0;
+      });
+      // collapse advanced if visible
+      const adv = clone.querySelector('.advanced');
+      adv.classList.remove('show');
+      return clone;
+    }
+
+    /* -----------------------
+       Submit / Prepare payload
+       (plugin point for your backend)
+       ----------------------- */
+    async function submitData(){
+      // prepare payload array
+      const payload = qsa('.area-row').map(r => ({
+        area_name: r.querySelector('.field-area-name')?.value || '',
+        total_population: toNumOrEmpty(r.querySelector('.field-population')?.value),
+        population_density: toNumOrEmpty(r.querySelector('.field-popdensity')?.value),
+        disaster_type: r.querySelector('.field-disaster')?.value || '',
+        severity: toNumOrEmpty(r.querySelector('.field-severity')?.value),
+        road_access: toNumOrEmpty(r.querySelector('.field-road')?.value),
+        estimated_injuries: toNumOrEmpty(r.querySelector('.field-injuries')?.value),
+        displaced: toNumOrEmpty(r.querySelector('.field-homeless')?.value),
+        // advanced
+        dist_hospital_km: toNumOrEmpty(r.querySelector('.field-dist-hosp')?.value),
+        dist_city_km: toNumOrEmpty(r.querySelector('.field-dist-city')?.value),
+        infrastructure_damage_pct: toNumOrEmpty(r.querySelector('.field-infra')?.value),
+        medical_stock: toNumOrEmpty(r.querySelector('.field-medstock')?.value),
+        food_stock: toNumOrEmpty(r.querySelector('.field-foodstock')?.value),
+        volunteers: toNumOrEmpty(r.querySelector('.field-volunteers')?.value),
+        internet: r.querySelector('.field-internet')?.value || '',
+        electricity: r.querySelector('.field-electric')?.value || '',
+        vulnerable_groups: r.querySelector('.field-vulnerable')?.value || ''
+      }));
+
+      // TODO: integrate with backend. Example:
+      // const res = await fetch('/api/predict', { method:'POST', body: JSON.stringify({areas: payload}), headers:{'Content-Type':'application/json'}});
+      // const result = await res.json();  // handle server's response on your output page
+
+      // For now, we just save local CSV and show toast; teacher can review exported CSV
+      showToast('Prepared payload with ' + payload.length + ' areas (integration placeholder).', 'success');
+      console.log('Prepared payload:', payload);
+
+      // Optionally: redirect to output page passing payload via POST or localStorage
+      // localStorage.setItem('pre_disaster_payload', JSON.stringify(payload));
+      // window.location.href = '/output_page.html';
+    }
+    document.getElementById('submitBtn').addEventListener('click', submitData);
+
+    function toNumOrEmpty(v){
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : '';
+    }
+
+    /* -----------------------
+       Compute/validation button (local client-side validation only)
+       ----------------------- */
+    document.getElementById('computeAllBtn').addEventListener('click', ()=>{
+      // basic validation: required essential fields not empty
+      const rows = qsa('.area-row', rowsContainer);
+      let ok = true, missing = 0;
+      rows.forEach((r,i)=>{
+        const name = r.querySelector('.field-area-name').value.trim();
+        const pop = r.querySelector('.field-population').value;
+        const dens = r.querySelector('.field-popdensity').value;
+        if(!name || !pop || !dens) { ok = false; missing++; r.style.border = '1px solid rgba(255,80,80,0.6)'; setTimeout(()=> r.style.border='1px solid rgba(255,255,255,0.03)',900); }
+      });
+      if(!ok) showToast('Validation failed: ' + missing + ' row(s) missing essential values', 'warning');
+      else showToast('All rows validated locally. Ready to submit', 'success');
+    });
+
+    /* -----------------------
+       Theme switching
+       ----------------------- */
+    const themeSelect = document.getElementById('themeSelect');
+    themeSelect.addEventListener('change', (e)=>{
+      const t = e.target.value;
+      if(t==='light'){
+        document.body.style.background = 'linear-gradient(180deg,#f6fbff 0%, #e8f6ff 60%)';
+        document.body.style.color = '#072033';
+        document.querySelectorAll('.card-panel').forEach(c=> c.style.background='white');
+        document.querySelectorAll('input,select').forEach(i=> i.style.color='#071026');
+      } else if(t==='teal'){
+        document.body.style.background = 'linear-gradient(180deg,#022c2f 0%, #06424b 70%)';
+        document.body.style.color = '#e8fffb';
+      } else {
+        // dark
+        document.body.style.background = 'linear-gradient(180deg, #021024 0%, #071428 60%)';
+        document.body.style.color = '#eaf8f6';
+      }
+    });
+
+    /* -----------------------
+       Tiny toast helper
+       ----------------------- */
+    function showToast(msg, type='info'){
+      const area = document.getElementById('toastArea');
+      const el = document.createElement('div');
+      el.className = 'card-panel';
+      el.style.minWidth = '260px';
+      el.style.marginTop = '8px';
+      el.innerHTML = `<div style="display:flex;gap:10px;align-items:center">
+        <div style="font-size:20px">${type==='success'?'✅':type==='warning'?'⚠️':'ℹ️'}</div>
+        <div style="font-size:13px"><strong>${msg}</strong></div>
+      </div>`;
+      area.appendChild(el);
+      setTimeout(()=> { el.style.opacity = '0'; setTimeout(()=> el.remove(), 400); }, 2600);
+    }
+
+    /* -----------------------
+       Initial state
+       ----------------------- */
+    updateStats();
+
+  </script>
+</body>
+</html>

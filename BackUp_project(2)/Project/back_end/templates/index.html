@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Style Transfer Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #08080f;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-card-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(120, 115, 245, 0.4);
+            --text-primary: #eaeaef;
+            --text-secondary: #8b8ba3;
+            --text-muted: #55556a;
+            --accent-purple: #7873f5;
+            --accent-cyan: #4adede;
+            --accent-pink: #ff6ec4;
+            --accent-orange: #ff9a44;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background blobs */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::before {
+            width: 600px; height: 600px;
+            background: var(--accent-purple);
+            top: -200px; left: -100px;
+            animation: floatBlob 20s ease-in-out infinite;
+        }
+        body::after {
+            width: 500px; height: 500px;
+            background: var(--accent-cyan);
+            bottom: -200px; right: -100px;
+            animation: floatBlob 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatBlob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(60px, -40px) scale(1.1); }
+            66% { transform: translate(-40px, 30px) scale(0.95); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* -- Header -- */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 100px;
+            background: rgba(120, 115, 245, 0.12);
+            border: 1px solid rgba(120, 115, 245, 0.2);
+            color: var(--accent-purple);
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 0%, #c8c8ff 40%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* -- Upload Zones -- */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .upload-zone {
+            background: var(--bg-card);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px 24px 24px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        .upload-zone.has-files {
+            border-color: rgba(74, 222, 222, 0.3);
+            border-style: solid;
+        }
+
+        .zone-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .zone-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .zone-icon.content { background: rgba(120, 115, 245, 0.15); }
+        .zone-icon.style { background: rgba(255, 110, 196, 0.15); }
+
+        .zone-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .zone-header .count {
+            margin-left: auto;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(74, 222, 222, 0.12);
+            color: var(--accent-cyan);
+        }
+
+        .drop-area {
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.25s ease;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .drop-area:hover {
+            border-color: var(--accent-purple);
+            background: rgba(120, 115, 245, 0.05);
+        }
+
+        .drop-area.drag-over {
+            border-color: var(--accent-cyan);
+            background: rgba(74, 222, 222, 0.08);
+        }
+
+        .drop-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .drop-area .drop-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .drop-area p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .drop-area p strong {
+            color: var(--accent-purple);
+        }
+
+        /* -- Thumbnail Grid -- */
+        .thumb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .thumb-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .thumb-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .thumb-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .thumb-item:hover .thumb-remove {
+            opacity: 1;
+        }
+
+        .thumb-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 3px 6px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: #fff;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* -- Combo Counter -- */
+        .combo-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 18px 24px;
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .combo-formula {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .combo-num {
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-size: 1.05rem;
+        }
+
+        .combo-op {
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .combo-total {
+            padding: 6px 18px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, rgba(120, 115, 245, 0.2), rgba(74, 222, 222, 0.2));
+            border: 1px solid rgba(120, 115, 245, 0.25);
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--accent-purple);
+        }
+
+        /* -- Settings -- */
+        .settings-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .settings-toggle h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .settings-toggle .chevron {
+            transition: transform 0.3s;
+            color: var(--text-muted);
+        }
+
+        .settings-toggle .chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .settings-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .settings-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+
+        /* -- Generate Button -- */
+        .btn-generate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: inherit;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent-purple), #5e5bdb);
+            color: #fff;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn-generate:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(120, 115, 245, 0.35);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* -- Progress Section -- */
+        .progress-section {
+            display: none;
+            margin-top: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+        }
+
+        .progress-section.visible { display: block; }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .progress-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .progress-header .progress-count {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-current {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.08);
+            border-top-color: var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-label strong {
+            color: var(--text-primary);
+        }
+
+        .progress-timer {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* -- Error -- */
+        .error-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 20px;
+            background: rgba(255, 60, 60, 0.15);
+            border: 1px solid rgba(255, 60, 60, 0.3);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-md);
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            z-index: 999;
+            display: none;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* -- Results Gallery -- */
+        .results-section {
+            display: none;
+            margin-top: 48px;
+        }
+
+        .results-section.visible { display: block; }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .results-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-download-all {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-orange));
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 110, 196, 0.3);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .gallery-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .gallery-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .gallery-result-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-card-body {
+            padding: 16px;
+        }
+
+        .gallery-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .gallery-pair-item {
+            text-align: center;
+        }
+
+        .gallery-pair-item img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .gallery-pair-item span {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 4px;
+        }
+
+        .gallery-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .gallery-card-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .btn-download-single {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 0.78rem;
+            font-family: inherit;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-download-single:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-purple);
+        }
+
+        /* -- Responsive -- */
+        @media (max-width: 768px) {
+            .upload-grid { grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2rem; }
+            .container { padding: 20px 16px 60px; }
+            .combo-bar { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-badge">&#x1F9E0; Powered by VGG19</div>
+            <h1>Style Transfer Studio</h1>
+            <p>Upload multiple content &amp; style images to generate every combination using neural style transfer</p>
+        </div>
+
+        <!-- Upload Zones -->
+        <div class="upload-grid">
+            <!-- Content Images -->
+            <div class="upload-zone" id="contentZone">
+                <div class="zone-header">
+                    <div class="zone-icon content">&#x1F4F7;</div>
+                    <h3>Content Images</h3>
+                    <span class="count" id="contentCount" style="display:none">0</span>
+                </div>
+                <div class="drop-area" id="contentDropArea">
+                    <input type="file" id="contentInput" accept="image/*" multiple>
+                    <div class="drop-icon">&#x2B;</div>
+                    <p>Drop images or <strong>click to browse</strong></p>
+                    <p style="margin-top:4px; font-size:0.75rem;">Select multiple photos to stylize</p>
+                </div>
+                <div class="thumb-grid" id="contentThumbs"></div>
+            </div>
+
+            <!-- Style Images -->
+            <div class="upload-zone" id="styleZone">
+                <div class="zone-header">
+                    <div class="zone-icon style">&#x1F3A8;</div>
+                    <h3>Style Images</h3>
+                    <span class="count" id="styleCount" style="display:none">0</span>
+                </div>
+                <div class="drop-area" id="styleDropArea">
+                    <input type="file" id="styleInput" accept="image/*" multiple>
+                    <div class="drop-icon">&#x2B;</div>
+                    <p>Drop images or <strong>click to browse</strong></p>
+                    <p style="margin-top:4px; font-size:0.75rem;">Select multiple artistic styles</p>
+                </div>
+                <div class="thumb-grid" id="styleThumbs"></div>
+            </div>
+        </div>
+
+        <!-- Combination Counter -->
+        <div class="combo-bar" id="comboBar" style="display:none">
+            <div class="combo-formula">
+                <span class="combo-num" id="comboContent">0</span>
+                <span>content</span>
+                <span class="combo-op">&times;</span>
+                <span class="combo-num" id="comboStyle">0</span>
+                <span>style</span>
+                <span class="combo-op">=</span>
+            </div>
+            <div class="combo-total"><span id="comboTotal">0</span> results to generate</div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-panel">
+            <div class="settings-toggle" id="settingsToggle">
+                <h3>&#x2699;&#xFE0F; Advanced Settings</h3>
+                <span class="chevron" id="settingsChevron">&#x25BC;</span>
+            </div>
+            <div class="settings-body collapsed" id="settingsBody">
+                <div class="form-group">
+                    <label>Image Size (px)</label>
+                    <input type="number" id="imageSize" value="256" min="64" max="768"
+                           title="Lower = faster. 256 recommended for CPU.">
+                </div>
+                <div class="form-group">
+                    <label>Steps</label>
+                    <input type="number" id="numSteps" value="150" min="10" max="500"
+                           title="More steps = better quality but slower.">
+                </div>
+                <div class="form-group">
+                    <label>Style Weight</label>
+                    <input type="number" id="styleWeight" value="1000000" min="1000" max="100000000">
+                </div>
+                <div class="form-group">
+                    <label>Content Weight</label>
+                    <input type="number" id="contentWeight" value="1" min="0.1" max="100" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="btn-generate" id="generateBtn" disabled>
+            <span>&#x2728;</span> Generate All Combinations
+        </button>
+
+        <!-- Progress -->
+        <div class="progress-section" id="progressSection">
+            <div class="progress-header">
+                <h3>Generating...</h3>
+                <span class="progress-count" id="progressCount">0 / 0</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-current">
+                <div class="spinner"></div>
+                <span class="progress-label" id="progressLabel">Preparing...</span>
+                <span class="progress-timer" id="progressTimer">0s</span>
+            </div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-toast" id="errorToast"></div>
+
+        <!-- Results Gallery -->
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2>&#x1F5BC;&#xFE0F; Generated Artworks</h2>
+                <button class="btn-download-all" id="downloadAllBtn">&#x1F4E5; Download All</button>
+            </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // -- State --
+        let contentFiles = [];   // { file, dataUrl, name }
+        let styleFiles = [];
+        let results = [];        // { blobUrl, contentDataUrl, styleDataUrl, contentName, styleName }
+        let isProcessing = false;
+        let timerInterval = null;
+
+        // -- DOM refs --
+        const contentInput = document.getElementById('contentInput');
+        const styleInput = document.getElementById('styleInput');
+        const contentThumbs = document.getElementById('contentThumbs');
+        const styleThumbs = document.getElementById('styleThumbs');
+        const contentCountEl = document.getElementById('contentCount');
+        const styleCountEl = document.getElementById('styleCount');
+        const contentZone = document.getElementById('contentZone');
+        const styleZone = document.getElementById('styleZone');
+        const comboBar = document.getElementById('comboBar');
+        const generateBtn = document.getElementById('generateBtn');
+        const progressSection = document.getElementById('progressSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const errorToast = document.getElementById('errorToast');
+
+        // -- File handling --
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function addFiles(targetArray, files, thumbContainer, countEl, zone) {
+            for (const file of files) {
+                if (!file.type.startsWith('image/')) continue;
+                const dataUrl = await readFileAsDataUrl(file);
+                targetArray.push({ file, dataUrl, name: file.name });
+            }
+            renderThumbs(targetArray, thumbContainer, countEl, zone);
+            updateCombo();
+        }
+
+        function renderThumbs(arr, container, countEl, zone) {
+            container.innerHTML = '';
+            arr.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'thumb-item';
+                div.innerHTML = `
+                    <img src="${item.dataUrl}" alt="${item.name}">
+                    <button class="thumb-remove" data-idx="${idx}">&times;</button>
+                    <div class="thumb-name">${item.name}</div>
+                `;
+                container.appendChild(div);
+            });
+
+            // Bind remove buttons
+            container.querySelectorAll('.thumb-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const i = parseInt(btn.dataset.idx);
+                    arr.splice(i, 1);
+                    renderThumbs(arr, container, countEl, zone);
+                    updateCombo();
+                });
+            });
+
+            // Update count badge
+            if (arr.length > 0) {
+                countEl.textContent = arr.length;
+                countEl.style.display = 'inline';
+                zone.classList.add('has-files');
+            } else {
+                countEl.style.display = 'none';
+                zone.classList.remove('has-files');
+            }
+        }
+
+        function updateCombo() {
+            const c = contentFiles.length;
+            const s = styleFiles.length;
+            const total = c * s;
+
+            document.getElementById('comboContent').textContent = c;
+            document.getElementById('comboStyle').textContent = s;
+            document.getElementById('comboTotal').textContent = total;
+
+            comboBar.style.display = (c > 0 && s > 0) ? 'flex' : 'none';
+            generateBtn.disabled = total === 0 || isProcessing;
+        }
+
+        // Content input
+        contentInput.addEventListener('change', (e) => {
+            addFiles(contentFiles, Array.from(e.target.files), contentThumbs, contentCountEl, contentZone);
+            contentInput.value = '';
+        });
+
+        // Style input
+        styleInput.addEventListener('change', (e) => {
+            addFiles(styleFiles, Array.from(e.target.files), styleThumbs, styleCountEl, styleZone);
+            styleInput.value = '';
+        });
+
+        // Drag & drop
+        ['contentDropArea', 'styleDropArea'].forEach((id, i) => {
+            const area = document.getElementById(id);
+            area.addEventListener('dragover', (e) => { e.preventDefault(); area.classList.add('drag-over'); });
+            area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('drag-over');
+                const files = Array.from(e.dataTransfer.files);
+                if (i === 0) addFiles(contentFiles, files, contentThumbs, contentCountEl, contentZone);
+                else addFiles(styleFiles, files, styleThumbs, styleCountEl, styleZone);
+            });
+        });
+
+        // -- Settings toggle --
+        document.getElementById('settingsToggle').addEventListener('click', () => {
+            const body = document.getElementById('settingsBody');
+            const chevron = document.getElementById('settingsChevron');
+            body.classList.toggle('collapsed');
+            chevron.classList.toggle('open');
+        });
+
+        // -- Timer --
+        function startTimer() {
+            let seconds = 0;
+            const el = document.getElementById('progressTimer');
+            timerInterval = setInterval(() => {
+                seconds++;
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                el.textContent = m > 0 ? `${m}m ${s}s` : `${s}s`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // -- Error --
+        function showError(msg) {
+            errorToast.textContent = msg;
+            errorToast.style.display = 'block';
+            setTimeout(() => { errorToast.style.display = 'none'; }, 6000);
+        }
+
+        // -- Generate all combinations --
+        generateBtn.addEventListener('click', async () => {
+            if (isProcessing) return;
+            isProcessing = true;
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<span>&#x23F3;</span> Processing...';
+            results = [];
+            galleryGrid.innerHTML = '';
+            resultsSection.classList.remove('visible');
+
+            const total = contentFiles.length * styleFiles.length;
+            let completed = 0;
+            let failed = 0;
+
+            // Show progress
+            progressSection.classList.add('visible');
+            document.getElementById('progressCount').textContent = `0 / ${total}`;
+            document.getElementById('progressBar').style.width = '0%';
+            startTimer();
+
+            const imageSize = document.getElementById('imageSize').value;
+            const numSteps = document.getElementById('numSteps').value;
+            const styleWeight = document.getElementById('styleWeight').value;
+            const contentWeight = document.getElementById('contentWeight').value;
+
+            // Process each pair sequentially
+            for (let ci = 0; ci < contentFiles.length; ci++) {
+                for (let si = 0; si < styleFiles.length; si++) {
+                    const cFile = contentFiles[ci];
+                    const sFile = styleFiles[si];
+                    const pairNum = ci * styleFiles.length + si + 1;
+
+                    document.getElementById('progressLabel').innerHTML =
+                        `Pair <strong>${pairNum}/${total}</strong> &mdash; "${cFile.name}" + "${sFile.name}"`;
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('content_image', cFile.file);
+                        formData.append('style_image', sFile.file);
+                        formData.append('image_size', imageSize);
+                        formData.append('num_steps', numSteps);
+                        formData.append('style_weight', styleWeight);
+                        formData.append('content_weight', contentWeight);
+
+                        const response = await fetch('/api/style-transfer', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (!response.ok) {
+                            const err = await response.json();
+                            throw new Error(err.detail || 'Failed');
+                        }
+
+                        const blob = await response.blob();
+                        const blobUrl = URL.createObjectURL(blob);
+
+                        results.push({
+                            blobUrl,
+                            contentDataUrl: cFile.dataUrl,
+                            styleDataUrl: sFile.dataUrl,
+                            contentName: cFile.name,
+                            styleName: sFile.name,
+                        });
+
+                        // Add card to gallery immediately
+                        appendGalleryCard(results[results.length - 1], results.length);
+
+                        if (!resultsSection.classList.contains('visible')) {
+                            resultsSection.classList.add('visible');
+                        }
+
+                    } catch (err) {
+                        failed++;
+                        showError(`Failed: "${cFile.name}" + "${sFile.name}" - ${err.message}`);
+                    }
+
+                    completed++;
+                    document.getElementById('progressCount').textContent = `${completed} / ${total}`;
+                    document.getElementById('progressBar').style.width = `${(completed / total) * 100}%`;
+                }
+            }
+
+            // Done
+            stopTimer();
+            isProcessing = false;
+            progressSection.classList.remove('visible');
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<span>&#x2728;</span> Generate All Combinations';
+
+            if (results.length > 0) {
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            if (failed > 0 && results.length > 0) {
+                showError(`Completed with ${failed} failure(s). ${results.length} images generated.`);
+            } else if (results.length === 0) {
+                showError('All style transfers failed. Check server logs.');
+            }
+        });
+
+        // -- Append a result card to the gallery --
+        function appendGalleryCard(result, index) {
+            const card = document.createElement('div');
+            card.className = 'gallery-card';
+            card.style.animationDelay = `${(index - 1) * 0.08}s`;
+            card.innerHTML = `
+                <img class="gallery-result-img" src="${result.blobUrl}" alt="Result ${index}">
+                <div class="gallery-card-body">
+                    <div class="gallery-pair">
+                        <div class="gallery-pair-item">
+                            <img src="${result.contentDataUrl}" alt="Content">
+                            <span>Content</span>
+                        </div>
+                        <div class="gallery-pair-item">
+                            <img src="${result.styleDataUrl}" alt="Style">
+                            <span>Style</span>
+                        </div>
+                    </div>
+                    <div class="gallery-card-footer">
+                        <span class="gallery-card-label">#${index}</span>
+                        <a class="btn-download-single" href="${result.blobUrl}" download="stylized_${index}.jpg">
+                            &#x2B07; Download
+                        </a>
+                    </div>
+                </div>
+            `;
+            galleryGrid.appendChild(card);
+        }
+
+        // -- Download All --
+        document.getElementById('downloadAllBtn').addEventListener('click', () => {
+            results.forEach((r, i) => {
+                const a = document.createElement('a');
+                a.href = r.blobUrl;
+                a.download = `stylized_${i + 1}_${r.contentName}_${r.styleName}.jpg`;
+                a.click();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Disaster Aid Classification Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            --bg-dark: #0f1419;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: var(--bg-card);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+        }
+
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        /* Card Styles */
+        .glass-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            border-radius: 15px;
+        }
+
+        .kpi-card.high::before { background: var(--danger-gradient); }
+        .kpi-card.medium::before { background: var(--warning-gradient); }
+        .kpi-card.low::before { background: var(--success-gradient); }
+        .kpi-card.total::before { background: var(--primary-gradient); }
+
+        .kpi-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Priority Distribution Chart */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Resource Allocation */
+        .resource-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            transform: scale(1.02);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .resource-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .resource-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .resource-icon.rescue { background: var(--danger-gradient); }
+        .resource-icon.food { background: var(--warning-gradient); }
+        .resource-icon.water { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); }
+        .resource-icon.medical { background: var(--success-gradient); }
+
+        .progress-custom {
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .progress-bar-custom {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+
+        /* Areas Table */
+        .areas-table {
+            background: var(--bg-card);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .table-custom {
+            margin-bottom: 0;
+        }
+
+        .table-custom th {
+            background: rgba(102, 126, 234, 0.1);
+            border: none;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .table-custom td {
+            border: none;
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .priority-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high { background: var(--danger-gradient); color: white; }
+        .priority-medium { background: var(--warning-gradient); color: #333; }
+        .priority-low { background: var(--success-gradient); color: white; }
+
+        .urgency-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .urgency-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .urgency-critical { background: #ff6b6b; }
+        .urgency-moderate { background: #feca57; }
+        .urgency-low { background: #48dbfb; }
+
+        /* Action Items */
+        .action-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .dashboard-title {
+                font-size: 2rem;
+            }
+            
+            .kpi-number {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Search Input */
+        .search-input {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header animate-fade-in">
+            <h1 class="dashboard-title">Pre-Disaster Aid Classification</h1>
+            <p class="dashboard-subtitle">AI-Powered Emergency Response Prioritization System</p>
+            <small class="text-muted">Last Updated: <span id="lastUpdated"></span></small>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card kpi-card total animate-fade-in">
+                    <div class="kpi-number" id="totalAreas">—</div>
+                    <div class="kpi-label">Total Areas</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card kpi-card high animate-fade-in">
+                    <div class="kpi-number" id="highPriority">—</div>
+                    <div class="kpi-label">High Priority</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card kpi-card medium animate-fade-in">
+                    <div class="kpi-number" id="mediumPriority">—</div>
+                    <div class="kpi-label">Medium Priority</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card kpi-card low animate-fade-in">
+                    <div class="kpi-number" id="lowPriority">—</div>
+                    <div class="kpi-label">Low Priority</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Row -->
+        <div class="row g-4 mb-5">
+            <!-- Priority Distribution Chart -->
+            <div class="col-lg-6">
+                <div class="glass-card animate-fade-in">
+                    <h4 class="mb-4">Priority Distribution</h4>
+                    <div class="chart-container">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resource Allocation -->
+            <div class="col-lg-6">
+                <div class="glass-card animate-fade-in">
+                    <h4 class="mb-4">Resource Allocation</h4>
+                    
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <div class="resource-icon rescue">
+                                <i class="bi bi-shield-plus"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Rescue Teams</h6>
+                                <small class="text-muted">Emergency Response Units</small>
+                            </div>
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom" id="rescueProgress" style="background: var(--danger-gradient);"></div>
+                        </div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <div class="resource-icon food">
+                                <i class="bi bi-basket3"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Food Supplies</h6>
+                                <small class="text-muted">Emergency Rations</small>
+                            </div>
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom" id="foodProgress" style="background: var(--warning-gradient);"></div>
+                        </div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <div class="resource-icon water">
+                                <i class="bi bi-droplet"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Water Supply</h6>
+                                <small class="text-muted">Clean Water Distribution</small>
+                            </div>
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom" id="waterProgress" style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);"></div>
+                        </div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <div class="resource-icon medical">
+                                <i class="bi bi-plus-circle"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Medical Teams</h6>
+                                <small class="text-muted">Healthcare Support</small>
+                            </div>
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom" id="medicalProgress" style="background: var(--success-gradient);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Areas Table and Suggested Actions -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="glass-card animate-fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4>Area Classifications</h4>
+                        <input type="text" class="form-control search-input" id="searchAreas" placeholder="Search areas..." style="width: 300px;">
+                    </div>
+                    
+                    <div class="areas-table">
+                        <table class="table table-custom" id="areasTable">
+                            <thead>
+                                <tr>
+                                    <th>Area</th>
+                                    <th>Priority</th>
+                                    <th>Urgency</th>
+                                    <th>Population</th>
+                                    <th>Resources Needed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="areasTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="glass-card animate-fade-in">
+                    <h4 class="mb-4">Suggested Actions</h4>
+                    <div id="suggestedActions">
+                        <!-- Actions will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - replace with your actual model output
+        const modelOutput = {
+            timestamp: new Date().toLocaleString(),
+            priorities: { High: 15, Medium: 25, Low: 35 },
+            areas: [
+                {
+                    area: "Downtown District",
+                    priority: "High",
+                    urgency: "Critical",
+                    urgency_hours: 6,
+                    population: 45000,
+                    rescue_teams: 8,
+                    food_supplies: 65,
+                    water_supply: 70,
+                    medical_teams: 6,
+                    action: "Immediate evacuation of vulnerable populations. Deploy emergency medical services."
+                },
+                {
+                    area: "Residential Zone A",
+                    priority: "Medium",
+                    urgency: "Moderate",
+                    urgency_hours: 18,
+                    population: 32000,
+                    rescue_teams: 5,
+                    food_supplies: 80,
+                    water_supply: 85,
+                    medical_teams: 4,
+                    action: "Establish temporary shelters. Distribute emergency supplies."
+                },
+                {
+                    area: "Industrial Park",
+                    priority: "High",
+                    urgency: "Critical",
+                    urgency_hours: 4,
+                    population: 15000,
+                    rescue_teams: 12,
+                    food_supplies: 45,
+                    water_supply: 40,
+                    medical_teams: 8,
+                    action: "Hazmat team deployment. Chemical spill containment protocols."
+                },
+                {
+                    area: "Suburban Area B",
+                    priority: "Low",
+                    urgency: "Low",
+                    urgency_hours: 48,
+                    population: 28000,
+                    rescue_teams: 3,
+                    food_supplies: 90,
+                    water_supply: 95,
+                    medical_teams: 2,
+                    action: "Monitoring and preventive measures. Community awareness programs."
+                },
+                {
+                    area: "Coastal Region",
+                    priority: "High",
+                    urgency: "Critical",
+                    urgency_hours: 8,
+                    population: 38000,
+                    rescue_teams: 10,
+                    food_supplies: 55,
+                    water_supply: 50,
+                    medical_teams: 7,
+                    action: "Flood barrier reinforcement. Boat rescue operations."
+                },
+                {
+                    area: "Mountain Village",
+                    priority: "Medium",
+                    urgency: "Moderate",
+                    urgency_hours: 24,
+                    population: 8500,
+                    rescue_teams: 4,
+                    food_supplies: 75,
+                    water_supply: 80,
+                    medical_teams: 3,
+                    action: "Landslide monitoring. Alternative route establishment."
+                }
+            ],
+            resources: {
+                rescue_total: 42,
+                food_total: 410,
+                water_total: 420,
+                medical_total: 30
+            }
+        };
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateTimestamp();
+            updateKPIs();
+            createPriorityChart();
+            updateResourceAllocation();
+            populateAreasTable();
+            generateSuggestedActions();
+            setupSearch();
+        }
+
+        // Update timestamp
+        function updateTimestamp() {
+            document.getElementById('lastUpdated').textContent = modelOutput.timestamp;
+        }
+
+        // Update KPI cards
+        function updateKPIs() {
+            const total = modelOutput.areas.length;
+            const highCount = modelOutput.areas.filter(a => a.priority === 'High').length;
+            const mediumCount = modelOutput.areas.filter(a => a.priority === 'Medium').length;
+            const lowCount = modelOutput.areas.filter(a => a.priority === 'Low').length;
+
+            document.getElementById('totalAreas').textContent = total;
+            document.getElementById('highPriority').textContent = highCount;
+            document.getElementById('mediumPriority').textContent = mediumCount;
+            document.getElementById('lowPriority').textContent = lowCount;
+        }
+
+        // Create priority distribution chart
+        function createPriorityChart() {
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            const highCount = modelOutput.areas.filter(a => a.priority === 'High').length;
+            const mediumCount = modelOutput.areas.filter(a => a.priority === 'Medium').length;
+            const lowCount = modelOutput.areas.filter(a => a.priority === 'Low').length;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Priority', 'Medium Priority', 'Low Priority'],
+                    datasets: [{
+                        data: [highCount, mediumCount, lowCount],
+                        backgroundColor: [
+                            'rgba(255, 107, 107, 0.8)',
+                            'rgba(254, 202, 87, 0.8)',
+                            'rgba(72, 219, 251, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 107, 107, 1)',
+                            'rgba(254, 202, 87, 1)',
+                            'rgba(72, 219, 251, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update resource allocation
+        function updateResourceAllocation() {
+            const totalRescue = modelOutput.areas.reduce((sum, area) => sum + area.rescue_teams, 0);
+            const totalFood = modelOutput.areas.reduce((sum, area) => sum + area.food_supplies, 0);
+            const totalWater = modelOutput.areas.reduce((sum, area) => sum + area.water_supply, 0);
+            const totalMedical = modelOutput.areas.reduce((sum, area) => sum + area.medical_teams, 0);
+
+            const maxResource = Math.max(totalRescue, totalFood, totalWater, totalMedical);
+
+            setTimeout(() => {
+                document.getElementById('rescueProgress').style.width = `${(totalRescue / maxResource) * 100}%`;
+                document.getElementById('foodProgress').style.width = `${(totalFood / maxResource) * 100}%`;
+                document.getElementById('waterProgress').style.width = `${(totalWater / maxResource) * 100}%`;
+                document.getElementById('medicalProgress').style.width = `${(totalMedical / maxResource) * 100}%`;
+            }, 500);
+        }
+
+        // Populate areas table
+        function populateAreasTable() {
+            const tbody = document.getElementById('areasTableBody');
+            tbody.innerHTML = '';
+
+            modelOutput.areas.forEach(area => {
+                const tr = document.createElement('tr');
+                
+                const urgencyClass = area.urgency === 'Critical' ? 'urgency-critical' : 
+                                   area.urgency === 'Moderate' ? 'urgency-moderate' : 'urgency-low';
+                
+                tr.innerHTML = `
+                    <td>
+                        <strong>${area.area}</strong><br>
+                        <small class="text-muted">${area.population.toLocaleString()} people</small>
+                    </td>
+                    <td>
+                        <span class="priority-badge priority-${area.priority.toLowerCase()}">${area.priority}</span>
+                    </td>
+                    <td>
+                        <div class="urgency-indicator">
+                            <div class="urgency-dot ${urgencyClass}"></div>
+                            <span>${area.urgency}</span>
+                        </div>
+                        <small class="text-muted">${area.urgency_hours}h</small>
+                    </td>
+                    <td>${area.population.toLocaleString()}</td>
+                    <td>
+                        <small>
+                            R: ${area.rescue_teams} | F: ${area.food_supplies}%<br>
+                            W: ${area.water_supply}% | M: ${area.medical_teams}
+                        </small>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Generate suggested actions
+        function generateSuggestedActions() {
+            const actionsContainer = document.getElementById('suggestedActions');
+            const highPriorityAreas = modelOutput.areas.filter(area => area.priority === 'High');
+
+            highPriorityAreas.forEach(area => {
+                const actionCard = document.createElement('div');
+                actionCard.className = 'action-card';
+                actionCard.innerHTML = `
+                    <div class="action-title">${area.area}</div>
+                    <p class="mb-0">${area.action}</p>
+                `;
+                actionsContainer.appendChild(actionCard);
+            });
+        }
+
+        // Setup search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchAreas');
+            const tbody = document.getElementById('areasTableBody');
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = tbody.getElementsByTagName('tr');
+
+                Array.from(rows).forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
